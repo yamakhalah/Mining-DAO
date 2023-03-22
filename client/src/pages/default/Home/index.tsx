@@ -1,8 +1,12 @@
 import React from 'react'
+import Navbar from '../../../components/Navigation/Navbar'
+import { getHomeNavigationProps } from '../../../types/propsType'
 
 function Home (): JSX.Element {
+  const navigationProps = getHomeNavigationProps()
+
   return (
-    <div>TEST HOME</div>
+    <Navbar homeRoute={navigationProps.homeRoute} routes={navigationProps.routes} />
   )
 }
 
