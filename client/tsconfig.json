@@ -1,0 +1,69 @@
+/*
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true
+  }
+}
+*/
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "lib": [
+      "dom",
+      "dom.iterable",
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "jsx": "react-jsx",
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "sourceMap": true,
+    "baseUrl": "src",
+    "paths": {
+      "@assets/*": ["assets/*"],
+      "@pages": ["pages/index.ts"],
+      "@features/*": ["features/*"],
+      "@images/*": ["assets/images/*"],
+      "@components": ["components/index.ts"],
+      "@components/*": ["components/*"],
+      "@utils": ["utils/index.ts"],
+      "@utils/*": ["utils/*"],
+      "@services": ["services/index.ts"],
+      "@services/*": ["services/*"],
+      "@router": ["router/index.ts"],
+      "@router/*": ["router/*"],
+      "@hooks": ["hooks/index.ts"],
+      "@hooks/*": ["hooks/*"],
+      "@config/*": ["config/*"],
+      "@/*": ["*"],
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "build"
+  ],
+}

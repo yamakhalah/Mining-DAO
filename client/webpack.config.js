@@ -6,7 +6,7 @@ const extensions = [".js", ".jsx",".ts",".tsx"];
 
 module.exports = {
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
-  entry: "./src/index.jsx",
+  entry: "./src/index.tsx",
   output: {
     path: path.resolve(__dirname, "build"),
   },
