@@ -6,6 +6,11 @@ const theme = createTheme({
     primary: {
       main: orange[500]
     }
+  },
+  typography: {
+    allVariants: {
+      color: 'white'
+    }
   }
 })
 
