@@ -11,7 +11,7 @@ export default makeStyles()((theme) => {
     },
 
     groupContainer: {
-      ...sharedProperties
+      margin: '7rem 3rem 7rem 3rem'
     },
 
     isolatedTypography: {
@@ -19,7 +19,13 @@ export default makeStyles()((theme) => {
     },
 
     gridItem: {
-      padding: '5rem 2rem 5rem 2rem'
+      padding: '8rem 1rem 8rem 1rem'
+    },
+
+    squaredImg: {
+      maxWidth: '55%',
+      height: 'auto',
+      margin: 'auto'
     }
   }
 })

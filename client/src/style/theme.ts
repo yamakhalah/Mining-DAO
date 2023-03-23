@@ -10,6 +10,9 @@ const theme = createTheme({
   typography: {
     allVariants: {
       color: 'white'
+    },
+    body1: {
+      fontSize: '20px'
     }
   }
 })
