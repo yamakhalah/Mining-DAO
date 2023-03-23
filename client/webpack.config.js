@@ -6,11 +6,21 @@ const extensions = [".js", ".jsx",".ts",".tsx"];
 
 module.exports = {
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
-  entry: "./src/index.jsx",
+  entry: "./src/index.tsx",
   output: {
     path: path.resolve(__dirname, "build"),
   },
-  resolve: { extensions },
+  resolve: {
+    extensions,
+    alias: {
+      pages: path.resolve(__dirname, "src/pages/"),
+      types: path.resolve(__dirname, "src/types/"),
+      style: path.resolve(__dirname, "src/style/"),
+      components: path.resolve(__dirname, "src/components/"),
+      router: path.resolve(__dirname, "src/router/"),
+      utils: path.resolve(__dirname, "src/utils/")
+    }
+  },
   devServer: {
     client: {
       overlay: false,
