@@ -22,6 +22,19 @@ const getHomeNavigationProps = (): NavigationProps => {
   }
 }
 
+const getAppNavigationProps = (): NavigationProps => {
+  const homeRoute: RouterData = { title: 'Mining DAO App', path: '/' }
+  const dashboardRoute: RouterData = { title: 'Dashboard', path: '/dashboard' }
+  const offersRoute: RouterData = { title: 'Offers', path: '/offers' }
+  const collectionRoute: RouterData = { title: 'Collection', path: '/collection' }
+  const investTicketRoute: RouterData = { title: 'Mint & Burn Invest Ticket', path: '/invest-ticket' }
+
+  return {
+    homeRoute: homeRoute,
+    routes: [dashboardRoute, offersRoute, collectionRoute, investTicketRoute]
+  }
+}
+
 export type { NavigationProps, RouterData }
 
-export { getHomeNavigationProps }
+export { getHomeNavigationProps, getAppNavigationProps }

@@ -1,8 +1,11 @@
 import React from 'react'
+import { BaseBackgroundBox } from 'components/index'
 
 function AppHome (): JSX.Element {
   return (
-    <div>TEST APP HOME</div>
+    <BaseBackgroundBox>
+      test App
+    </BaseBackgroundBox>
   )
 }
 

@@ -20,7 +20,8 @@ module.exports = {
   ],
   rules: {
     'react/prop-types': ['off'],
-    "@typescript-eslint/strict-boolean-expressions": "warn",
-    "@typescript-eslint/consistent-type-imports": "warn"
+    'multiline-ternary': ['off'],
+    '@typescript-eslint/strict-boolean-expressions': "warn",
+    '@typescript-eslint/consistent-type-imports': "warn"
   }
 }

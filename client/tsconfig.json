@@ -39,31 +39,18 @@
     "sourceMap": true,
     "baseUrl": "src",
     "paths": {
-      "@assets/*": ["assets/*"],
-      "@pages": ["pages/index.ts"],
-      "@features/*": ["features/*"],
-      "@images/*": ["assets/images/*"],
-      "@components": ["components/index.ts"],
-      "@components/*": ["components/*"],
-      "@utils": ["utils/index.ts"],
-      "@utils/*": ["utils/*"],
-      "@services": ["services/index.ts"],
-      "@services/*": ["services/*"],
-      "@router": ["router/index.ts"],
-      "@router/*": ["router/*"],
-      "@hooks": ["hooks/index.ts"],
-      "@hooks/*": ["hooks/*"],
-      "@config/*": ["config/*"],
       "@/*": ["*"],
     }
   },
   "include": [
-    "src"
+    "src",
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "coverage",
-    "build"
+    "build",
+    ".idea"
   ],
 }

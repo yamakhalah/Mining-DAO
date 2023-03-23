@@ -1,2 +1,4 @@
-export { default as Home } from './default/Home/index'
-export { default as AppHome } from './app/AppHome/index'
+import Home from './default/Home/index'
+import AppHome from './app/AppHome/index'
+
+export { Home, AppHome }

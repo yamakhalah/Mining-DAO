@@ -6,7 +6,7 @@ import {
   Typography, Box
 } from '@mui/material'
 import { Link } from 'react-router-dom'
-import { NavigationProps, RouterData } from '@/types/propsType'
+import { NavigationProps, RouterData } from 'types/propsType'
 import useNavbarStyle from './Navbar.style'
 
 function Navbar ({ homeRoute, routes }: NavigationProps): JSX.Element {

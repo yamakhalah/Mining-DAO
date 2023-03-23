@@ -3,20 +3,21 @@ import { EthProvider } from './contexts/EthContext'
 import { BrowserRouter } from 'react-router-dom'
 import { getApp } from './utils/helpers'
 import theme from './style/theme'
-import { ThemeProvider } from '@mui/material'
+import { CssBaseline, ThemeProvider } from '@mui/material'
 
 const App = (): JSX.Element => {
   const AppWithDomain = getApp()
   return (
-    <EthProvider>
-      <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          <div id="App">
-                <AppWithDomain />
-          </div>
-        </ThemeProvider>
-      </BrowserRouter>
-    </EthProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <EthProvider>
+        <div id="App">
+          <BrowserRouter>
+            <AppWithDomain />
+          </BrowserRouter>
+        </div>
+      </EthProvider>
+    </ThemeProvider>
   )
 }
 

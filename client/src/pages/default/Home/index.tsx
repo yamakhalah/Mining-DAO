@@ -1,12 +1,18 @@
 import React from 'react'
-import Navbar from '../../../components/Navigation/Navbar'
-import { getHomeNavigationProps } from '../../../types/propsType'
+import { Box } from '@mui/material'
+// import { BaseBackgroundBox } from 'components/index'
 
 function Home (): JSX.Element {
-  const navigationProps = getHomeNavigationProps()
-
   return (
-    <Navbar homeRoute={navigationProps.homeRoute} routes={navigationProps.routes} />
+    <>
+      <Box sx={{
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#051629'
+      }}>
+        test homeddd
+      </Box>
+    </>
   )
 }
 
