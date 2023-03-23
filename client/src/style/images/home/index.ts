@@ -8,6 +8,7 @@ import mutualisationImg from './mutualisationglitch.png'
 import pognonImg from './pognonglitch.png'
 import followImg from './SUIVIglitch.png'
 import upImg from './upglitch.png'
+import backgroundImg from './FOND DEGRADE.png'
 
 export {
   btcDecentralImg,
@@ -19,5 +20,6 @@ export {
   mutualisationImg,
   pognonImg,
   followImg,
-  upImg
+  upImg,
+  backgroundImg
 }

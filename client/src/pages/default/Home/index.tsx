@@ -3,7 +3,8 @@ import { BaseBackgroundBox } from 'components/index'
 import {
   Grid,
   Typography,
-  Box
+  Box,
+  Button
 } from '@mui/material'
 import useHomeStyle from './home.style'
 import {
@@ -17,9 +18,15 @@ import {
   followImg,
   mutualisationImg
 } from 'style/images/home/index'
+import logoImg from 'style/images/LOGO-PNG-BLANC.png'
 
 function Home (): JSX.Element {
   const { classes } = useHomeStyle()
+
+  function moveToApp (): void {
+    window.location.replace('http://app.' + window.location.host)
+  }
+
   return (
     <>
       <BaseBackgroundBox>
@@ -29,23 +36,35 @@ function Home (): JSX.Element {
               justifyContent="center"
         >
           <Grid container
-                spacing={4}
+                spacing={2}
                 className={classes.topContainer}
           >
-            <Grid item xs={12} className={classes.gridItem}>
-              <Typography variant="h1" component="h1" align="center">
-                MINING DAO
-              </Typography>
+            <Grid item xs={12}>
+              <Box
+                component="img"
+                alt="logoImg"
+                src={logoImg}
+                display="flex"
+                className={classes.logoImg}
+              />
             </Grid>
-            <Grid item xs={12} className={classes.gridItem}>
-              <Typography variant="h2" component="h3" align="center">
+            <Grid item xs={12}>
+              <Typography variant="h1" component="h2" align="center">
                 L&apos;unique option pour mutualiser vos ressources
               </Typography>
             </Grid>
-            <Grid item xs={12} className={classes.gridItem}>
-              <Typography variant="h2" component="h3" align="center">
-                BUTTON HERE
-              </Typography>
+            <Grid item xs={12}>
+              <Box textAlign="center">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="medium"
+                  className={classes.button}
+                  onClick={ () => { moveToApp() }}
+                >
+                  Découvrir nos offres
+                </Button>
+              </Box>
             </Grid>
           </Grid>
 

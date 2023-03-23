@@ -1,13 +1,17 @@
 import { makeStyles } from 'tss-react/mui'
+import backgroundImg from 'style/images/home/FOND DEGRADE.png'
 
 const sharedProperties = {
-  margin: '7rem 0rem 7rem 0rem'
+  padding: '10rem 0rem 5rem 0rem'
 }
 
 export default makeStyles()((theme) => {
   return {
     topContainer: {
-      ...sharedProperties
+      marginTop: '10vh',
+      height: '100vh',
+      backgroundImage: `url(${backgroundImg})`,
+      backgroundSize: 'cover'
     },
 
     groupContainer: {
@@ -26,6 +30,21 @@ export default makeStyles()((theme) => {
       maxWidth: '55%',
       height: 'auto',
       margin: 'auto'
+    },
+
+    logoImg: {
+      paddingTop: '5rem',
+      maxWidth: '50%',
+      height: 'auto',
+      margin: 'auto'
+    },
+
+    button: {
+      width: '20%',
+      height: '4rem',
+      fontSize: '17px',
+      color: 'white',
+      borderRadius: '5rem'
     }
   }
 })

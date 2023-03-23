@@ -11,8 +11,7 @@ function BaseBackgroundBox (props: BoxProps): JSX.Element {
       sx={{
         width: '100%',
         height: '100%',
-        backgroundColor: '#051629',
-        padding: ' 8rem 5rem 8rem 5rem'
+        backgroundColor: '#051629'
       }}
     >
       {props.children}
