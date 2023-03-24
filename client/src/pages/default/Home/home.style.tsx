@@ -18,12 +18,22 @@ export default makeStyles()((theme) => {
       margin: '7rem 3rem 7rem 3rem'
     },
 
+    offersContainer: {
+      width: '80vw'
+    },
+
     isolatedTypography: {
       ...sharedProperties
     },
 
     gridItem: {
       padding: '8rem 1rem 8rem 1rem'
+    },
+
+    gridItemFull: {
+      padding: '0rem',
+      margin: '0rem',
+      width: '100vw'
     },
 
     squaredImg: {
@@ -37,6 +47,11 @@ export default makeStyles()((theme) => {
       maxWidth: '50%',
       height: 'auto',
       margin: 'auto'
+    },
+
+    coverImg: {
+      maxHeight: 'auto',
+      width: '100vw'
     },
 
     button: {

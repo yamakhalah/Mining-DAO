@@ -1,5 +1,5 @@
 import React from 'react'
-import { BaseBackgroundBox } from 'components/index'
+import { BaseBackgroundBox, MiningOfferBox } from 'components'
 import {
   Grid,
   Typography,
@@ -16,8 +16,15 @@ import {
   daoImg,
   decentralImg,
   followImg,
-  mutualisationImg
-} from 'style/images/home/index'
+  mutualisationImg,
+  schemaImg
+} from 'style/images/home'
+
+import {
+  offerNFTOrange,
+  offerNFTGreyAndWhite,
+  offerNFTPurple
+} from 'style/images/offers'
 import logoImg from 'style/images/LOGO-PNG-BLANC.png'
 
 function Home (): JSX.Element {
@@ -256,10 +263,26 @@ function Home (): JSX.Element {
             </Grid>
           </Grid>
           <Grid item xs={12} className={classes.gridItem}>
-            How it works
+            <Typography variant="h3" component="h4" align="center">
+              L&apos;écosystème mining DAO
+            </Typography>
           </Grid>
-          <Grid item xs={12} className={classes.gridItem}>
-            Offers
+          <Grid item xs={12} className={classes.gridItemFull}>
+            <Box
+              component="img"
+              alt="schemaImg"
+              src={schemaImg}
+              display="flex"
+              className={classes.coverImg}
+            />
+          </Grid>
+          <Grid
+            container
+            className={classes.offersContainer}
+          >
+          <MiningOfferBox offerImg={offerNFTPurple} tokenImg={''} apy={'30'} />
+          <MiningOfferBox offerImg={offerNFTGreyAndWhite} tokenImg={''} apy={'55'} />
+          <MiningOfferBox offerImg={offerNFTOrange} tokenImg={''} apy={'95'} />
           </Grid>
         </Grid>
       </BaseBackgroundBox>

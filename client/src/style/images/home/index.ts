@@ -9,6 +9,7 @@ import pognonImg from './pognonglitch.png'
 import followImg from './SUIVIglitch.png'
 import upImg from './upglitch.png'
 import backgroundImg from './FOND DEGRADE.png'
+import schemaImg from './SCHEMA-TRANSPARENT-PROCHE-16.9.png'
 
 export {
   btcDecentralImg,
@@ -21,5 +22,6 @@ export {
   pognonImg,
   followImg,
   upImg,
-  backgroundImg
+  backgroundImg,
+  schemaImg
 }
