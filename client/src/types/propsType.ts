@@ -12,7 +12,7 @@ const getHomeNavigationProps = (): NavigationProps => {
   const homeRoute: RouterData = { title: 'Mining DAO', path: '/' }
   const docsRoute: RouterData = { title: 'Docs', path: '/docs' }
   const mediaRoute: RouterData = { title: 'Media', path: '/medias' }
-  const blogRoute: RouterData = { title: 'Bog', path: '/blog' }
+  const blogRoute: RouterData = { title: 'Blog', path: '/blog' }
   const contactRoute: RouterData = { title: 'Contact', path: '/contact' }
   const teamRoute: RouterData = { title: 'Team', path: '/team' }
 

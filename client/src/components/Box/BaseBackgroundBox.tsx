@@ -1,5 +1,6 @@
 import React from 'react'
 import { Box } from '@mui/material'
+import backgroundImg from 'style/images/BACK-NOIR--PARTICULES-LONG.png'
 
 interface BoxProps {
   children: React.ReactNode
@@ -11,7 +12,8 @@ function BaseBackgroundBox (props: BoxProps): JSX.Element {
       sx={{
         width: '100%',
         height: '100%',
-        backgroundColor: '#051629'
+        backgroundImage: `url(${backgroundImg})`,
+        backgroundSize: 'contain'
       }}
     >
       {props.children}
