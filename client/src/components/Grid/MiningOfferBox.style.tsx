@@ -16,10 +16,6 @@ export default makeStyles()((theme) => {
       borderRadius: '5rem'
     },
 
-    offerContainer: {
-      marginTop: '5rem'
-    },
-
     gridItem: {
       margin: '1.5rem 0rem 1.5rem 0rem'
     },

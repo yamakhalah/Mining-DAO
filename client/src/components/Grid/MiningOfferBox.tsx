@@ -17,7 +17,7 @@ function MiningOfferBox (props: MiningOfferBoxProps): JSX.Element {
   const { classes } = useMiningOfferBoxStyle()
 
   return (
-    <Grid item xs={12} md={4} className={classes.offerContainer}>
+    <Grid item xs={12} md={4}>
       <Box
         component="img"
         alt="offerImg"

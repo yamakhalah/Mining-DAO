@@ -19,6 +19,7 @@ export default makeStyles()((theme) => {
     },
 
     offersContainer: {
+      margin: '15rem 0rem 10rem 0rem',
       width: '80vw'
     },
 
