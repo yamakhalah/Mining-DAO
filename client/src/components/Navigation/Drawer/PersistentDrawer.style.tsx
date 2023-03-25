@@ -1,35 +1,21 @@
 import { makeStyles } from 'tss-react/mui'
 
 export default makeStyles()((theme) => {
+  const drawerWidth = 260
+
   return {
-    toolbar: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      padding: '1rem 2rem'
+    drawer: {
+      backgroundColor: '#0a2338',
+      width: drawerWidth
     },
 
-    iconBox: {
-      maxWidth: '20vw',
-      textDecoration: 'none',
-      color: 'white',
-      '&:hover': {
-        textDecoration: 'none',
-        color: 'white'
-      },
-      '&:visited': {
-        textDecoration: 'none',
-        color: 'white'
-      }
-    },
-
-    linkBox: {
-      paddingRight: '7rem',
-      display: 'flex',
-      listStyle: 'none'
+    drawerPaper: {
+      backgroundColor: '#0a2338',
+      width: drawerWidth
     },
 
     link: {
-      fontSize: '2.5rem',
+      fontSize: '1.8rem',
       textDecoration: 'none',
       color: 'white',
       paddingRight: '6rem',
@@ -43,10 +29,25 @@ export default makeStyles()((theme) => {
       }
     },
 
+    homeLink: {
+      textDecoration: 'none',
+      '&:hover': {
+        textDecoration: 'none',
+        color: 'white'
+      },
+      '&:visited': {
+        textDecoration: 'none',
+        color: 'white'
+      },
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+
     logoImg: {
-      maxWidth: '60%',
+      maxWidth: '80%',
       height: 'auto',
-      margin: 'right'
+      margin: '2rem 1rem 2rem 1rem'
     }
   }
 })

@@ -137,12 +137,6 @@ function Home (): JSX.Element {
             </Grid>
 
             <Grid item xs={12} md={6} className={classes.gridItem}>
-              <Typography variant="body1" component="p" align="center">
-                Le coût d&apos;investissement n&apos;a jamais été aussi élevé et les
-                besoins opérationnels si complexe (énergie, décibel, chaleur).
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6} className={classes.gridItem}>
               <Box
                 component="img"
                 alt="pognonImg"
@@ -150,6 +144,12 @@ function Home (): JSX.Element {
                 display="flex"
                 className={classes.squaredImg}
               />
+            </Grid>
+            <Grid item xs={12} md={6} className={classes.gridItem}>
+              <Typography variant="body1" component="p" align="center">
+                Le coût d&apos;investissement n&apos;a jamais été aussi élevé et les
+                besoins opérationnels si complexe (énergie, décibel, chaleur).
+              </Typography>
             </Grid>
           </Grid>
 

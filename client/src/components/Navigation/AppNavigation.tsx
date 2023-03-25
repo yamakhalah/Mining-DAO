@@ -1,11 +1,11 @@
 import React from 'react'
-import { getAppNavigationProps } from 'types/propsType'
-import NavDrawer from './Drawer/Drawer'
+import { getAppNavigationProps } from 'types/routerPropsType'
+import PersistentDrawer from './Drawer/PersistentDrawer'
 
 function MainNavigation (): JSX.Element {
   const navigationProps = getAppNavigationProps()
   return (
-    <NavDrawer homeRoute={navigationProps.homeRoute} routes={navigationProps.routes} />
+    <PersistentDrawer homeRoute={navigationProps.homeRoute} routes={navigationProps.routes} />
   )
 }
 
