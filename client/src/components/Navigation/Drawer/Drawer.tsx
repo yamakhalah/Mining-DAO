@@ -6,9 +6,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Typography,
+  Box,
   styled
-
 } from '@mui/material'
 import {
   Menu,
@@ -16,7 +15,7 @@ import {
   ChevronRight
 } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
-import { NavigationProps, RouterData } from 'types/propsType'
+import { NavigationProps, RouterData } from 'types/routerPropsType'
 import useDrawerStyle from './Drawer.style'
 import theme from 'style/theme'
 
@@ -47,9 +46,12 @@ function NavDrawer ({ homeRoute, routes }: NavigationProps): JSX.Element {
         </DrawerHeader>
         <Divider />
         <Link to={homeRoute.path} className={classes.link}>
-          <Typography variant='h4'>
-            {homeRoute.title}
-          </Typography>
+          <Box
+            component="img"
+            alt="logoImg"
+            src={homeRoute.img}
+            className={classes.logoImg}
+          />
         </Link>
         <Divider />
         <List>

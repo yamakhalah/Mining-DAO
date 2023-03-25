@@ -1,5 +1,5 @@
 import React from 'react'
-import { getHomeNavigationProps } from 'types/propsType'
+import { getHomeNavigationProps } from 'types/routerPropsType'
 import { useTheme, useMediaQuery } from '@mui/material'
 import Navbar from './Navbar/Navbar'
 import NavDrawer from './Drawer/Drawer'

@@ -25,6 +25,11 @@ export default makeStyles()((theme) => {
         textDecoration: 'none',
         color: 'white'
       }
+    },
+
+    logoImg: {
+      maxWidth: '30%',
+      height: 'auto'
     }
   }
 })
