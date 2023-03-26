@@ -4,7 +4,7 @@ const secret = process.env.PINATA_SECRET
 const pinataSDK = require('@pinata/sdk')
 const pinata = new pinataSDK(key, secret)
 const fs = require('fs')
-const readableStreamForFile = fs.createReadStream('./images/MINING-NFT-ORANGE.png')
+const readableStreamForFile = fs.createReadStream('/Users/dylandivito/DEV/Solidity/Mining-DAO/truffle/scripts/images/MINING-NFT-ORANGE.png')
 
 const options = {
   pinataMetadata: {
@@ -15,11 +15,11 @@ const options = {
   }
 }
 
-pinata.pinFilesToIPFS(readableStreamForFile, options).then((result) => {
+pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
   const body = {
-    description: 'Investment Ticket',
+    description: 'On your way to heaven',
     image: result.IpfsHash,
-    name: 'Mining DAO - Invest Ticket Name'
+    name: 'Investment Ticket '
   }
 
   pinata.pinJSONToIPFS(body, options).then((json) => {
