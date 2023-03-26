@@ -80,9 +80,9 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable{
         require(!ticket.isUsed, "This ticket has already been used");
         require(ticket.ticketOwner == msg.sender, "Caller is not owner");
 
+        ticketByTokenId[_tokenId].isUsed = true;
         _burn(_tokenId);
 
-        ticketByTokenId[_tokenId].isUsed = true;
         emit TicketBurned(ticket);
     }
 
@@ -93,11 +93,10 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable{
         require(ticket.ticketOwner == msg.sender, "Caller is not owner");
 
         uint residualValue = (ticket.gweiValue * 90) / 100;
+        ticketByTokenId[_tokenId].isUsed = true;
 
         (bool sent, bytes memory data) = _address.call{value: residualValue}("test call");
         require(sent, "Failed to send Ether");
-
-        ticketByTokenId[_tokenId].isUsed = true;
 
         emit TicketBurned(ticket);
         emit TicketRefund(ticket);
