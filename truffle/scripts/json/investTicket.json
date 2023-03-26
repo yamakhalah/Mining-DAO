@@ -1,0 +1,15 @@
+{
+  "description": "Private investment ticket",
+  "image": "QmPQB8dZQecrKrFEMm9vqhY2ciJWFFcSVbpK1QghKnTWjn/MINING-NFT-ORANGE.png",
+  "name": "Mining DAO - Investment Ticket",
+  "attribute": [
+    {
+      "trait_type": "USDT Value",
+      "value" : "500"
+    },
+    {
+      "trait_type": "MATIC Value",
+      "value" : "4O"
+    }
+  ]
+}
