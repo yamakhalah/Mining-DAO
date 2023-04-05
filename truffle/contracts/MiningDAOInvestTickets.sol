@@ -161,4 +161,15 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         ticketsByAddress[_address] = tickets;
     }
 
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
+        require(!ticketByTokenId[tokenId].isUsed, "You cannot transfer a used token");
+        require(!ticketByTokenId[tokenId].isStaked, "You cannot transfer a staked token");
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override {
+        super.safeTransferFrom(from, to, tokenId);
+        ticketByTokenId[tokenId].ticketOwner = to;
+    }
+
 }

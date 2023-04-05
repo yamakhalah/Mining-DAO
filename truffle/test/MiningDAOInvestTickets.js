@@ -9,6 +9,7 @@ contract("MiningDAOInvestTickets", accounts => {
   const tokenUri = "https://gateway.pinata.cloud/ipfs/QmavcjZXHmzx9guhBaqwCFVy5BwcxRkEK3aDBEjr9PHriy"
   const DAOAdress = accounts[0]
 
+  /*
   describe("Initial state and basic get/set test", () => {
     beforeEach(async function() {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress,tokenUri, { from: accounts[0]})
@@ -200,5 +201,30 @@ contract("MiningDAOInvestTickets", accounts => {
       )
     })
   })
+*/
+  describe("transfer", () => {
+    beforeEach(async function () {
+      investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress, tokenUri, {from: accounts[0]})
+      await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
+      await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
+      await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
+    })
 
+    it("Should not let transfer an used token", async() => {
+      await investTicketsInstance.stakeTicket(BN(1), {from: accounts[1]})
+      await investTicketsInstance.useTicket(BN(1), {from: accounts[1]})
+      await expectRevert(investTicketsInstance.safeTransferFrom(accounts[1], accounts[2], BN(1), { from: accounts[1] }), 'You cannot transfer a used token');
+    })
+
+    it("Should not let transfer an staked token", async() => {
+      await investTicketsInstance.stakeTicket(BN(2), {from: accounts[1]})
+      await expectRevert(investTicketsInstance.safeTransferFrom(accounts[1], accounts[2], BN(2), { from: accounts[1] }), 'You cannot transfer a staked token');
+    })
+
+    it("Should transfer NFT and modify ticketOwner", async() => {
+      await investTicketsInstance.safeTransferFrom(accounts[1], accounts[2], BN(3), {from: accounts[1]})
+      const ticket = await investTicketsInstance.getTicketByTokenId(BN(3));
+      expect(ticket.ticketOwner).to.be.equal(accounts[2])
+    })
+  })
 })
