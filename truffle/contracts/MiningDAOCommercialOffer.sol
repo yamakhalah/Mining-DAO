@@ -3,9 +3,8 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
-import '@openzeppelin/contracts/utils/Counters.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
+import './MiningDAOInvestTickets.sol';
 
 // ADD 5% Royalty
 // ADD STATIC Variable method
@@ -13,11 +12,11 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 
 
-contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
+contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     using Counters for Counters.Counter;
 
 
-    IERC721 public immutable MintTicketNftCollection;
+    MiningDAOInvestTickets private InvestTicketsContract;
 
     enum WorkflowStatus {
         Initialized,
@@ -60,8 +59,8 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
     address DAOWallet;
     address[] DAOTeamWallets;
     address treasuryWallet;
-    string name;
-    string reference;
+    string offerName;
+    string ref;
     mapping(address => bool) whitelisted;
 
     WorkflowStatus public workflowStatus;
@@ -72,7 +71,7 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
     Counters.Counter ticketsCounter;
     uint lockTimeLimit;
     LinkedListInvestTicket linkedListHead;
-    LinkedListInvestTicket LinkedListLast;
+    LinkedListInvestTicket linkedListLast;
     LinkedListInvestTicket[] stakerList;
     mapping(address => InvestTicketsStaked) investTicketsStaked;
 
@@ -83,27 +82,27 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
     OfferTicket[] offerOwnersList;
     mapping(address => OfferTicket) public offerTicketOwners;
 
-    event InvestTicketsStaked(InvestTicket ticket);
-    event InvestTicketsUnstaked(InvestTicket ticket);
+    event InvestTicketStaked(InvestTicket ticket);
+    event InvestTicketUnstaked(InvestTicket ticket);
     event RewardClaimed(OfferTicket ticket);
     event WorkflowStatusChanged(WorkflowStatus previous, WorkflowStatus current);
 
     //CONSTRUCTOR
     constructor(
-        address _mintTicketNftCollectionAddress,
-        string _name,
-        string _reference,
-        string _collectionName,
+        address _InvestTicketsContractAddress,
+        string memory _offerName,
+        string memory _ref,
+        string memory _collectionName,
         address _DAOWallet,
-        address[] _DAOTeamWallets,
+        address[] memory _DAOTeamWallets,
         address _treasuryWallet,
         uint _minimumTickets,
         uint _maximumTickets,
         uint _lockTimeLimit
-    ) ERC721(_collectionName, _reference){
-        mintTicketNftCollection = IERC721(_mintTicketNftCollectionAddress);
-        name = _name;
-        reference = _reference;
+    ) ERC721(_collectionName, _ref){
+        InvestTicketsContract = MiningDAOInvestTickets(_InvestTicketsContractAddress);
+        offerName = _offerName;
+        ref = _ref;
         DAOWallet = _DAOWallet;
         DAOTeamWallets = _DAOTeamWallets;
         treasuryWallet = _treasuryWallet;
@@ -125,13 +124,13 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
 
     //MODIFIER CHECK isInvestTicketStaker
     modifier isInvestTicketStacker() {
-        require(investTicketStaked[msg.sender] == true, "You are not a Ticket Staked");
+        require(investTicketsStaked[msg.sender].amountOfTicketStaked.current() >= 1, "You are not a Ticket Staked");
         _;
     }
 
     //MOFICIER CHECK isOfferTicketOwner
     modifier isOfferTicketOwner() {
-        require(offerTicketOwners[msg.sender] == true, "You are not an offer ticket owner");
+        require(offerTicketOwners[msg.sender].power >= 1, "You are not an offer ticket owner");
         _;
     }
 
@@ -139,42 +138,42 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
     function stakeTicket(uint _tokenId) external {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
         require(!investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket already staked");
-        MintTicketNftCollection.stakeTicket(_tokenId);
+        InvestTicketsContract.stakeTicket(_tokenId);
         InvestTicket memory investTicket = InvestTicket(msg.sender, _tokenId, true);
-        investTicketsStaked[msg.sender].amountOfTicketStaked.increment();
         investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId] = investTicket;
+        investTicketsStaked[msg.sender].amountOfTicketStaked.increment();
 
-        LinkedListInvestTicket item;
-        if(!head.isStaked) {
-            item = LinkedListInvestTicket(-1,investTicket,-1);
+        LinkedListInvestTicket memory item;
+        if(!linkedListHead.ticket.isStaked) {
+            item = LinkedListInvestTicket(0,investTicket,0);
             linkedListHead = item;
-        }else {
-            item = LinkedListInvestTicket(linkedListLast,investTicket,-1);
+        } else {
+            item = LinkedListInvestTicket(linkedListLast.ticket.tokenId,investTicket,0);
             linkedListLast.nextIndex = item.ticket.tokenId;
         }
         stakerList[_tokenId] = item;
         linkedListLast = item;
 
         ticketsCounter.increment();
-        if(ticketsCounter == maximumTickets){
+        if(ticketsCounter.current() == maximumTickets){
             mintTicketRegistrationEnded();
         }
-        emit InvestTicketStaked(item);
+        emit InvestTicketStaked(item.ticket);
     }
 
     //UNSTAKE INVEST TICKET METHOD
     function unstakeTicket(uint _tokenId) external isInvestTicketStacker {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
         require(investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket is not staked");
-        MintTicketNftCollection.unstakeTicket(_tokenId);
+        InvestTicketsContract.unstakeTicket(_tokenId);
 
-        LinkedListInvestTicket item = stakerList[_tokenId];
+        LinkedListInvestTicket memory item = stakerList[_tokenId];
         if(linkedListHead.ticket.tokenId == _tokenId) {
             linkedListHead = stakerList[linkedListHead.nextIndex];
-            linkedListHead.previousIndex = -1;
+            linkedListHead.previousIndex = 0;
         }else if(linkedListLast.ticket.tokenId == _tokenId){
             linkedListLast = stakerList[linkedListLast.previousIndex];
-            linkedListLast.nextIndex = -1;
+            linkedListLast.nextIndex = 0;
         }else{
             stakerList[item.previousIndex].nextIndex = item.nextIndex;
             stakerList[item.nextIndex].previousIndex = item.previousIndex;
@@ -184,7 +183,7 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
         investTicketsStaked[msg.sender].amountOfTicketStaked.decrement();
         delete investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId];
 
-        emit InvestTicketUnstaked(item);
+        emit InvestTicketUnstaked(item.ticket);
     }
 
     function unstakeAllTickets() internal {
@@ -195,7 +194,7 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
 
     //DAOSIGNATURE REQUEST
     function DAOTeamSignatureRequest() external {
-        require(msg.sender = DAOWallet, "You are not the DAO !");
+        require(msg.sender == DAOWallet, "You are not the DAO !");
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationEnded);
         DAOTeamSignatureCompleted();
     }
@@ -215,19 +214,19 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
     function mintTicketRegistrationStarted() external onlyOwner {
         require(workflowStatus == WorkflowStatus.Initialized, "Mint ticket registration have not been started yet");
         workflowStatus = WorkflowStatus.MintTicketsRegistrationStarted;
-        WorkflowStatusChanged(WorkflowStatus.Initialized, WorkflowStatusChanged.MintTicketsRegistrationStarted);
+        emit WorkflowStatusChanged(WorkflowStatus.Initialized, WorkflowStatus.MintTicketsRegistrationStarted);
     }
 
     //END MINT TICKET REGISTRATION
     function mintTicketRegistrationEnded() internal {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Mint ticket registration have not been started yet");
-        if(ticketsCounter.current() < minimumTicket){
+        if(ticketsCounter.current() < minimumTickets){
             workflowStatus = WorkflowStatus.CanceledMinimumTicketsNotReach;
             unstakeAllTickets();
-            WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationStarted, WorkflowStatusChanged.CanceledMinimumTicketsNotReach);
+            emit WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationStarted, WorkflowStatus.CanceledMinimumTicketsNotReach);
         } else {
             workflowStatus = WorkflowStatus.MintTicketsRegistrationEnded;
-            WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationStarted, WorkflowStatusChanged.MintTicketRegistrationEnded);
+            emit WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationStarted, WorkflowStatus.MintTicketsRegistrationEnded);
         }
 
     }
@@ -235,7 +234,7 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
     function DAOTeamSignatureCompleted() internal {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationEnded, "Ticket registration not ended");
         workflowStatus = WorkflowStatus.DAOTeamSignatureCompleted;
-        WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationEnded, WorkflowStatus.DAOTeamSignatureCompleted);
+        emit WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationEnded, WorkflowStatus.DAOTeamSignatureCompleted);
     }
 
     //SWITCH TO RUNNING MODE (need totalThPower and set timeOfLastRewardUpdate)
@@ -246,7 +245,7 @@ contract MiningInvestTicketsNFT is ERC721URIStorage, Ownable, ReentrancyGuard{
 
     //CHECK IF TIME EXPIRED
     function checkLockTimeExpired() external {
-        if(lockTimeLimit > now) {
+        if(lockTimeLimit > block.timestamp) {
             mintTicketRegistrationEnded();
         }
     }
