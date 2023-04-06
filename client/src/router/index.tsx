@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import { Home, AppHome } from 'pages/index'
+import { Home, AppHome, InvestTicket } from 'pages/index'
 import { MainNavigation, AppNavigation } from 'components/'
 
 function DefaultRouter (): JSX.Element {
@@ -20,6 +20,7 @@ function AppRouter (): JSX.Element {
     <AppNavigation />
     <Routes>
       <Route path='/' element={<AppHome />} />
+      <Route path='/invest-ticket' element={<InvestTicket />} />
     </Routes>
     </>
   )
