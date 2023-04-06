@@ -9,12 +9,15 @@ import { configureChains, createClient, WagmiConfig } from 'wagmi'
 import { arbitrumGoerli } from 'wagmi/chains'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
-require('dotenv').config();
+import * as dotenv from 'dotenv'
+dotenv.config()
+
+const ALCHEMY_ID: string = process.env.ALCHEMY_ID ?? 'YVEO9LH2Wsju9Wn8pDSKJUs4VMA2kLTo'
 
 const { chains, provider, webSocketProvider } = configureChains(
   [arbitrumGoerli],
   [
-    alchemyProvider({ apiKey: process.env.ALCHEMY_ID }),
+    alchemyProvider({ apiKey: ALCHEMY_ID }),
     publicProvider()
   ]
 )
