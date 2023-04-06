@@ -48,6 +48,16 @@ export default makeStyles()((theme) => {
       maxWidth: '80%',
       height: 'auto',
       margin: '2rem 1rem 2rem 1rem'
+    },
+
+    connectBox: {
+      position: 'relative'
+    },
+
+    connectButton: {
+      position: 'absolute',
+      width: '50%',
+      bottom: '10px'
     }
   }
 })
