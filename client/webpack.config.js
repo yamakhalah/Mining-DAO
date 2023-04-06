@@ -1,10 +1,12 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const EslintWebpackPlugin = require("eslint-webpack-plugin");
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 
 const extensions = [".js", ".jsx",".ts",".tsx"];
 
 module.exports = {
+  target: 'web',
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
   entry: "./src/index.tsx",
   output: {
@@ -19,6 +21,9 @@ module.exports = {
       components: path.resolve(__dirname, "src/components/"),
       router: path.resolve(__dirname, "src/router/"),
       utils: path.resolve(__dirname, "src/utils/")
+    },
+    fallback: {
+      "fs": false
     }
   },
   devServer: {
@@ -68,6 +73,7 @@ module.exports = {
       template: "./public/index.html",
       favicon: "./public/favicon.ico",
     }),
+    new NodePolyfillPlugin(),
   ],
   stats: "minimal",
 };
