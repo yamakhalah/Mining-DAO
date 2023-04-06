@@ -1,0 +1,11 @@
+{
+  "description": "Private investment ticket",
+  "image": "https://gateway.pinata.cloud/ipfs/QmPQB8dZQecrKrFEMm9vqhY2ciJWFFcSVbpK1QghKnTWjn/MINING-NFT-ORANGE.png",
+  "name": "Investment Ticket",
+  "attribute": [
+    {
+      "trait_type": "ETH Value",
+      "value" : "0.00001"
+    }
+  ]
+}
