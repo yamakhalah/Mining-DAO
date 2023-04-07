@@ -35,6 +35,7 @@ function InvestTicket (): JSX.Element {
     let newTickets: Ticket[] = await instance.getTicketsByAddress(address as string)
     newTickets = newTickets.filter(t => !t.isStaked && !t.isUsed)
     setTickets(newTickets)
+    alert('Your NFT have been minted')
   }
 
   const burnTicket = async (): Promise<void> => {
@@ -43,6 +44,7 @@ function InvestTicket (): JSX.Element {
     let newTickets: Ticket[] = await instance.getTicketsByAddress(address as string)
     newTickets = newTickets.filter(t => !t.isStaked && !t.isUsed)
     setTickets(newTickets)
+    alert('Your NFT have been burned')
   }
 
   return (
@@ -56,7 +58,7 @@ function InvestTicket (): JSX.Element {
         { isConnected ? (
           <>
             <Grid item xs={12} className={classes.container}>
-              <Typography variant="h3" component="h4" align="center">
+              <Typography variant="h3" component="h4" align="center" className={classes.lightBackground}>
                 Vos tickets: {tickets.length}
               </Typography>
             </Grid>

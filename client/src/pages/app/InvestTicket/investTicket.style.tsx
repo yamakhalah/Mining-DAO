@@ -18,6 +18,13 @@ export default makeStyles()((theme) => {
       alignItems: 'center'
     },
 
+    lightBackground: {
+      backgroundColor: '#42475F !important',
+      borderRadius: '20px',
+      width: '15vw',
+      margin: 'auto'
+    },
+
     logoImg: {
       paddingTop: '5rem',
       maxWidth: '100%',

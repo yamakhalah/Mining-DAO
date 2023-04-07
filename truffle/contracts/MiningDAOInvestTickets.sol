@@ -40,7 +40,7 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
 
 
     constructor(address _DAOAdress, string memory _tokenURI) ERC721("Mining DAO - Investment Tickets", "MDAO") {
-        //https://gateway.pinata.cloud/ipfs/QmavcjZXHmzx9guhBaqwCFVy5BwcxRkEK3aDBEjr9PHriy
+        //https://gateway.pinata.cloud/ipfs/QmbB3aBLJHbqf2T2mZy1KSwodadPS83c4MjGBwAHTNqmZL
         DAOAddress = _DAOAdress;
         tokenUri = _tokenURI;
     }
