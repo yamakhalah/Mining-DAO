@@ -37,12 +37,22 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
     mapping (address => Ticket[]) private ticketsByAddress;
     mapping (address => Ticket[]) private usableTicketsByAddress;
     mapping (uint => Ticket) private ticketByTokenId;
+    mapping (address => bool) private whitelistedOfferContract;
+
 
 
     constructor(address _DAOAdress, string memory _tokenURI) ERC721("Mining DAO - Investment Tickets", "MDAO") {
-        //https://gateway.pinata.cloud/ipfs/QmbB3aBLJHbqf2T2mZy1KSwodadPS83c4MjGBwAHTNqmZL
+        //https://gateway.pinata.cloud/ipfs/QmavcjZXHmzx9guhBaqwCFVy5BwcxRkEK3aDBEjr9PHriy
         DAOAddress = _DAOAdress;
         tokenUri = _tokenURI;
+    }
+
+    function whitelist(address _contract) public onlyOwner{
+        whitelistedOfferContract[_contract] = true;
+    }
+
+    function unWhitelist(address _contract) public onlyOwner{
+        whitelistedOfferContract[_contract] = false;
     }
 
     function getTicketsByAddress(address _address) public view returns (Ticket[] memory) {
@@ -53,11 +63,11 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         return ticketByTokenId[_tokenId];
     }
 
-    function getTotalNFT() public view virtual returns (uint256) {
+    function getTotalNFT() public view returns (uint256) {
         return _tokenIds.current();
     }
 
-    function getTokenUri() public view virtual returns (string memory) {
+    function getTokenUri() public view returns (string memory) {
         return tokenUri;
     }
 
@@ -65,7 +75,7 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         tokenUri = _tokenUri;
     }
 
-    function getMintPriceETH() public view virtual returns (uint){
+    function getMintPriceETH() public view returns (uint){
         return mintPriceETH;
     }
 
@@ -89,11 +99,12 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         return ticket.tokenId;
     }
 
-    function stakeTicket(uint _tokenId) public {
+    function stakeTicket(address _origin, uint _tokenId) public {
         Ticket memory ticket = ticketByTokenId[_tokenId];
         require(ticket.isMinted, "Not a minter");
         require(!ticket.isUsed, "This ticket has already been used");
-        require(ticket.ticketOwner == msg.sender, "Caller is not owner");
+        require(ticket.ticketOwner == _origin, "Caller is not a minter");
+        require(whitelistedOfferContract[msg.sender], "Caller is not a whitelisted contract");
         require(!ticket.isStaked, "Token already staked");
 
         ticket.isStaked = true;
@@ -102,11 +113,12 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         emit TicketStaked(ticket);
     }
 
-    function unstakeTicket(uint _tokenId) public {
+    function unstakeTicket(address _origin, uint _tokenId) public {
         Ticket memory ticket = ticketByTokenId[_tokenId];
         require(ticket.isMinted, "Not a minter");
         require(!ticket.isUsed, "This ticket has already been used");
-        require(ticket.ticketOwner == msg.sender, "Caller is not owner");
+        require(ticket.ticketOwner == _origin, "Caller is not a minter");
+        require(whitelistedOfferContract[msg.sender], "Caller is not a whitelisted contract");
         require(ticket.isStaked, "Token is not staked");
 
         ticket.isStaked = false;
@@ -115,11 +127,12 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         emit TicketUnstaked(ticket);
     }
 
-    function useTicket(uint _tokenId) public {
+    function useTicket(address _origin, uint _tokenId) public {
         Ticket memory ticket = ticketByTokenId[_tokenId];
         require(ticket.isMinted, "Not a minter");
         require(!ticket.isUsed, "This ticket has already been used");
-        require(ticket.ticketOwner == msg.sender, "Caller is not owner");
+        require(ticket.ticketOwner == _origin, "Caller is not a minter");
+        require(whitelistedOfferContract[msg.sender], "Caller is not a whitelisted contract");
         require(ticket.isStaked, "Token is not staked");
 
         _burn(_tokenId);
@@ -173,4 +186,5 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         super.safeTransferFrom(from, to, tokenId);
         ticketByTokenId[tokenId].ticketOwner = to;
     }
+
 }

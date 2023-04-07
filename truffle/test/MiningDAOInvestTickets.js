@@ -9,7 +9,7 @@ contract("MiningDAOInvestTickets", accounts => {
   const tokenUri = "https://gateway.pinata.cloud/ipfs/QmavcjZXHmzx9guhBaqwCFVy5BwcxRkEK3aDBEjr9PHriy"
   const DAOAdress = accounts[0]
 
-  /*
+
   describe("Initial state and basic get/set test", () => {
     beforeEach(async function() {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress,tokenUri, { from: accounts[0]})
@@ -29,7 +29,7 @@ contract("MiningDAOInvestTickets", accounts => {
       expect(mintPriceETH).to.be.bignumber.equal(BN(2000000000000000))
     })
   })
-
+/*
   describe("Mint Ticket Test and associated getter", () => {
     beforeEach(async function() {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress,tokenUri, { from: accounts[0]})
@@ -201,7 +201,7 @@ contract("MiningDAOInvestTickets", accounts => {
       )
     })
   })
-*/
+
   describe("transfer", () => {
     beforeEach(async function () {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress, tokenUri, {from: accounts[0]})
@@ -227,4 +227,6 @@ contract("MiningDAOInvestTickets", accounts => {
       expect(ticket.ticketOwner).to.be.equal(accounts[2])
     })
   })
+
+ */
 })

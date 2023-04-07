@@ -138,7 +138,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     function stakeTicket(uint _tokenId) external {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
         require(!investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket already staked");
-        InvestTicketsContract.stakeTicket(_tokenId);
+        InvestTicketsContract.stakeTicket(msg.sender, _tokenId);
         InvestTicket memory investTicket = InvestTicket(msg.sender, _tokenId, true);
         investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId] = investTicket;
         investTicketsStaked[msg.sender].amountOfTicketStaked.increment();
@@ -165,7 +165,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     function unstakeTicket(uint _tokenId) external isInvestTicketStacker {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
         require(investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket is not staked");
-        InvestTicketsContract.unstakeTicket(_tokenId);
+        InvestTicketsContract.unstakeTicket(msg.sender, _tokenId);
 
         LinkedListInvestTicket memory item = stakerList[_tokenId];
         if(linkedListHead.ticket.tokenId == _tokenId) {
