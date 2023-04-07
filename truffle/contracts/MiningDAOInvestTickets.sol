@@ -35,6 +35,7 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
     address private DAOAddress;
     string private tokenUri;
     mapping (address => Ticket[]) private ticketsByAddress;
+    mapping (address => Ticket[]) private usableTicketsByAddress;
     mapping (uint => Ticket) private ticketByTokenId;
 
 
@@ -121,10 +122,10 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         require(ticket.ticketOwner == msg.sender, "Caller is not owner");
         require(ticket.isStaked, "Token is not staked");
 
+        _burn(_tokenId);
         ticket.isUsed = true;
         ticketByTokenId[_tokenId] = ticket;
         removeFromList(msg.sender, _tokenId);
-        _burn(_tokenId);
 
         emit TicketBurned(ticket);
     }
@@ -136,13 +137,14 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         require(ticket.ticketOwner == msg.sender, "Caller is not owner");
 
         uint residualValue = (ticket.gweiValue * 95) / 100;
-        ticket.isUsed = true;
-        ticketByTokenId[_tokenId] = ticket;
 
         (bool sent, bytes memory data) = _address.call{value: residualValue}("95% of NFT refund");
         require(sent, "Failed to send Ether");
-        removeFromList(_address, _tokenId);
         _burn(_tokenId);
+
+        ticket.isUsed = true;
+        ticketByTokenId[_tokenId] = ticket;
+        removeFromList(_address, _tokenId);
 
         emit TicketBurned(ticket);
         emit TicketRefund(ticket);
@@ -171,5 +173,4 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         super.safeTransferFrom(from, to, tokenId);
         ticketByTokenId[tokenId].ticketOwner = to;
     }
-
 }

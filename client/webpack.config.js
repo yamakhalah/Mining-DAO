@@ -20,17 +20,21 @@ module.exports = {
       style: path.resolve(__dirname, "src/style/"),
       components: path.resolve(__dirname, "src/components/"),
       router: path.resolve(__dirname, "src/router/"),
-      utils: path.resolve(__dirname, "src/utils/")
+      utils: path.resolve(__dirname, "src/utils/"),
+      services: path.resolve(__dirname, "src/services/"),
+      contracts: path.resolve(__dirname, "src/contracts/")
     },
     fallback: {
       "fs": false
     }
   },
   devServer: {
+    historyApiFallback: true,
     client: {
       overlay: false,
     },
   },
+  devtool: "source-map",
   module: {
     rules: [
       {

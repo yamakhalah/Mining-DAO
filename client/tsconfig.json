@@ -1,25 +1,10 @@
-/*
-{
-  "compilerOptions": {
-    "outDir": "./dist/",
-    "noImplicitAny": true,
-    "module": "es6",
-    "target": "es5",
-    "jsx": "react-jsx",
-    "allowJs": true,
-    "moduleResolution": "node",
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "strictNullChecks": true
-  }
-}
-*/
 {
   "compilerOptions": {
     "target": "ES6",
     "lib": [
       "dom",
       "dom.iterable",
+      "es2015.iterable"
     ],
     "allowJs": true,
     "skipLibCheck": true,
