@@ -10,7 +10,6 @@ import {
 } from '@mui/material'
 import { NavigationProps, RouterData } from 'types/routerPropsType'
 import { Link } from 'react-router-dom'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 function PersistentDrawer ({ homeRoute, routes }: NavigationProps): JSX.Element {
   const { classes } = usePersistentDrawerStyle()
@@ -44,7 +43,6 @@ function PersistentDrawer ({ homeRoute, routes }: NavigationProps): JSX.Element 
           )
         })}
       </List>
-          <ConnectButton />
     </Drawer>
   )
 }

@@ -4,7 +4,7 @@ const secret = process.env.PINATA_SECRET
 const pinataSDK = require('@pinata/sdk')
 const pinata = new pinataSDK(key, secret)
 const fs = require('fs')
-const readableStreamForFile = fs.createReadStream('/Users/dylandivito/DEV/Solidity/Mining-DAO/truffle/scripts/images/MINING-NFT-ORANGE.png')
+const readableStreamForFile = fs.createReadStream('/Users/dylandivito/DEV/Solidity/Mining-DAO/truffle/scripts/images/ticket.png')
 
 const options = {
   pinataMetadata: {
