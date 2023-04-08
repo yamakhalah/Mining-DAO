@@ -7,8 +7,7 @@ const Web3 = require('web3')
 const tokenUri = "https://gateway.pinata.cloud/ipfs/QmavcjZXHmzx9guhBaqwCFVy5BwcxRkEK3aDBEjr9PHriy"
 
 const getBasicInvestTicketInstance = async (accounts) => {
-  const test = await MiningDAOInvestTickets.new(accounts[0],tokenUri, { from: accounts[0]})
-  return test
+  return await MiningDAOInvestTickets.new(accounts[0],tokenUri, { from: accounts[0]})
 }
 
 const getBasicCommercialOfferInstance = async (accounts, contractAddress) => {
@@ -125,7 +124,7 @@ contract("MiningDAOCommercialOffer", accounts => {
       await commercialOfferInstance.stakeTicket(BN(1), {from: accounts[1]})
       await commercialOfferInstance.stakeTicket(BN(2), {from: accounts[1]})
       await commercialOfferInstance.stakeTicket(BN(3), {from: accounts[1]})
-      
+
       await commercialOfferInstance.unstakeTicket(BN(2), {from: accounts[1]})
       let tickets = await commercialOfferInstance.getStakedList()
       expect(tickets.length).to.be.equal(2)

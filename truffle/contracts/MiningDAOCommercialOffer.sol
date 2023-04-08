@@ -43,9 +43,17 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     struct OfferTicket {
         address ticketOwner;
         uint256 power;
+        string tokenUri;
+        uint tokenId;
         Counters.Counter unclaimedMonths;
         uint256 unclaimedValue;
         uint256 timeOfLastRewardUpdate;
+    }
+
+    struct OfferTicketProps {
+        address ticketOwner;
+        uint power;
+        string tokenUri;
     }
 
     struct LinkedListInvestTicket {
@@ -137,6 +145,10 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     function getStakedTicket(uint _tokenId) public view returns (LinkedListInvestTicket memory) {
         //return stakedList[_tokenId];
         return linkedListLast;
+    }
+
+    function getTotalStakedTicket() public view returns (uint) {
+        return ticketsCounter.current();
     }
 
     function getStakedList() public view returns (InvestTicket[] memory) {
@@ -248,8 +260,22 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     }
 
     //GENERATE OFFER NFT
-    function generateOfferNFT() internal {
-        //BURN TICKET AND GENERATE OFFER
+    function generateOfferNFT(OfferTicketProps[] calldata _offerTicketData, uint256 totalThPower) public onlyOwner {
+        require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO must have signed first');
+        uint tokenId = 1;
+        timeOfLastRewardUpdate = block.timestamp;
+        for(uint i; i < _offerTicketData.length; i++) {
+            Counters.Counter memory counter;
+            OfferTicketProps memory ticketData = _offerTicketData[i];
+            OfferTicket memory ticket = OfferTicket(ticketData.ticketOwner, ticketData.power, ticketData.tokenUri, tokenId, counter, 0, block.timestamp);
+            offerOwnersList.push(ticket);
+            offerTicketOwners[ticketData.ticketOwner] = ticket;
+
+            _mint(ticketData.ticketOwner, tokenId);
+            _setTokenURI(tokenId, ticketData.tokenUri);
+
+            tokenId++;
+        }
     }
 
     //HANDLE OFFER NFT TRANSFER (ownership change)
