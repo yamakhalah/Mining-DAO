@@ -31,7 +31,7 @@ contract("MiningDAOCommercialOffer", accounts => {
   let investTicketsInstance;
   let commercialOfferInstance;
 
-  describe("Test", () => {
+  describe("Staking test", () => {
     beforeEach(async function() {
       investTicketsInstance = await getBasicInvestTicketInstance(accounts)
       commercialOfferInstance = await getBasicCommercialOfferInstance(accounts, investTicketsInstance.address)
@@ -81,4 +81,68 @@ contract("MiningDAOCommercialOffer", accounts => {
     })
   })
 
+  describe("Unstaking test", () => {
+    beforeEach(async function() {
+      investTicketsInstance = await getBasicInvestTicketInstance(accounts)
+      commercialOfferInstance = await getBasicCommercialOfferInstance(accounts, investTicketsInstance.address)
+
+      await investTicketsInstance.whitelist(commercialOfferInstance.address)
+
+      await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
+      await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
+      await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
+
+    })
+
+    it("Should not let me unstake a ticket because im not a staker", async() => {
+      await expectRevert(commercialOfferInstance.unstakeTicket(BN(1), {from: accounts[1]}), 'You have 0 Ticket Staked')
+    })
+
+    it("Should let me unstake a minted ticket", async() => {
+      await commercialOfferInstance.mintTicketRegistrationStarted({ from: accounts[0]})
+      await commercialOfferInstance.stakeTicket(BN(1), {from: accounts[1]})
+      await commercialOfferInstance.unstakeTicket(BN(1), {from: accounts[1]})
+      const ticket = await investTicketsInstance.getTicketByTokenId(BN(1),  {from: accounts[1]})
+      const tickets = await commercialOfferInstance.getStakedList()
+      expect(tickets.length).to.be.equal(0)
+      expect(ticket.tokenId).to.be.bignumber.equal(BN(1))
+      expect(ticket.ticketOwner).to.be.equal(accounts[1])
+      expect(ticket.gweiValue).to.be.bignumber.equal(BN(1000000000000000))
+      expect(ticket.isUsed).to.be.equal(false)
+      expect(ticket.isMinted).to.be.equal(true)
+      expect(ticket.isStaked).to.be.equal(false)
+    })
+
+    it("Should not let me unstake the same ticket twice", async () => {
+      await commercialOfferInstance.mintTicketRegistrationStarted({ from: accounts[0]})
+      await commercialOfferInstance.stakeTicket(BN(1), {from: accounts[1]})
+      await commercialOfferInstance.unstakeTicket(BN(1), {from: accounts[1]})
+      await expectRevert(commercialOfferInstance.unstakeTicket(BN(1), {from: accounts[1]}), 'You have 0 Ticket Staked')
+    })
+
+    it("Should let me unstake 3 tickets and return me a correct list on each step", async() => {
+      await commercialOfferInstance.mintTicketRegistrationStarted({ from: accounts[0]})
+      await commercialOfferInstance.stakeTicket(BN(1), {from: accounts[1]})
+      await commercialOfferInstance.stakeTicket(BN(2), {from: accounts[1]})
+      await commercialOfferInstance.stakeTicket(BN(3), {from: accounts[1]})
+      
+      await commercialOfferInstance.unstakeTicket(BN(2), {from: accounts[1]})
+      let tickets = await commercialOfferInstance.getStakedList()
+      expect(tickets.length).to.be.equal(2)
+      expect(tickets[0].tokenId).to.be.bignumber.equal(BN(1))
+      expect(tickets[0].isStaked).to.be.equal(true)
+      expect(tickets[1].tokenId).to.be.bignumber.equal(BN(3))
+      expect(tickets[1].isStaked).to.be.equal(true)
+
+      await commercialOfferInstance.unstakeTicket(BN(1), {from: accounts[1]})
+      tickets = await commercialOfferInstance.getStakedList()
+      expect(tickets.length).to.be.equal(1)
+      expect(tickets[0].tokenId).to.be.bignumber.equal(BN(3))
+      expect(tickets[0].isStaked).to.be.equal(true)
+
+      await commercialOfferInstance.unstakeTicket(BN(3), {from: accounts[1]})
+      tickets = await commercialOfferInstance.getStakedList()
+      expect(tickets.length).to.be.equal(0)
+    })
+  })
 })

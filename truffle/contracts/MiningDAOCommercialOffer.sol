@@ -124,7 +124,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
 
     //MODIFIER CHECK isInvestTicketStaker
     modifier isInvestTicketStacker() {
-        require(investTicketsStaked[msg.sender].amountOfTicketStaked.current() >= 1, "You are not a Ticket Staked");
+        require(investTicketsStaked[msg.sender].amountOfTicketStaked.current() >= 1, "You have 0 Ticket Staked");
         _;
     }
 
@@ -134,8 +134,9 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         _;
     }
 
-    function getStakedItem(uint _tokenId) public view returns (LinkedListInvestTicket memory) {
-        return stakedList[_tokenId];
+    function getStakedTicket(uint _tokenId) public view returns (LinkedListInvestTicket memory) {
+        //return stakedList[_tokenId];
+        return linkedListLast;
     }
 
     function getStakedList() public view returns (InvestTicket[] memory) {
@@ -192,15 +193,37 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         InvestTicketsContract.unstakeTicket(msg.sender, _tokenId);
 
         LinkedListInvestTicket memory item = stakedList[_tokenId];
-        if(linkedListHead.ticket.tokenId == _tokenId) {
-            linkedListHead = stakedList[linkedListHead.nextIndex];
-            linkedListHead.previousIndex = 0;
+        LinkedListInvestTicket memory _default;
+        if(ticketsCounter.current() == 1) {
+            linkedListHead = _default;
+            linkedListLast = _default;
+        }else if(linkedListHead.ticket.tokenId == _tokenId) {
+            if(linkedListHead.nextIndex == linkedListLast.ticket.tokenId){
+                linkedListHead = LinkedListInvestTicket(0,stakedList[linkedListHead.nextIndex].ticket,0);
+                linkedListLast = _default;
+            } else {
+                linkedListHead = stakedList[linkedListHead.nextIndex];
+                linkedListHead.previousIndex = 0;
+            }
         }else if(linkedListLast.ticket.tokenId == _tokenId){
-            linkedListLast = stakedList[linkedListLast.previousIndex];
-            linkedListLast.nextIndex = 0;
+            if(linkedListHead.nextIndex == linkedListLast.ticket.tokenId){
+                linkedListHead.nextIndex = 0;
+                linkedListLast = _default;
+            } else {
+                linkedListLast = stakedList[linkedListLast.previousIndex];
+                linkedListLast.nextIndex = 0;
+            }
         }else{
-            stakedList[item.previousIndex].nextIndex = item.nextIndex;
-            stakedList[item.nextIndex].previousIndex = item.previousIndex;
+            LinkedListInvestTicket memory previous = stakedList[item.previousIndex];
+            LinkedListInvestTicket memory next = stakedList[item.nextIndex];
+            previous.nextIndex = item.nextIndex;
+            next.previousIndex = item.previousIndex;
+            if(linkedListHead.ticket.tokenId == previous.ticket.tokenId) {
+                linkedListHead = previous;
+            }
+            if(linkedListLast.ticket.tokenId == next.ticket.tokenId) {
+                linkedListLast = previous;
+            }
         }
         delete stakedList[_tokenId];
 
