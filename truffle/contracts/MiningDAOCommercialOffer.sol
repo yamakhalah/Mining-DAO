@@ -23,8 +23,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         MintTicketsRegistrationStarted,
         MintTicketsRegistrationEnded,
         DAOTeamSignatureCompleted,
-        RunningNoClaim,
-        RunningWithClaim,
+        Running,
         CanceledMinimumTicketsNotReach,
         Stopped
     }
@@ -276,6 +275,18 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
 
             tokenId++;
         }
+
+        burnAllTickets();
+        running();
+    }
+
+    function burnAllTickets() internal {
+        require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO must have signed first');
+        InvestTicket[] memory investTickets = getStakedList();
+        for(uint i; i < investTickets.length; i++) {
+            InvestTicket memory ticket = investTickets[i];
+            InvestTicketsContract.useTicket(ticket.investTicketOwner, ticket.tokenId);
+        }
     }
 
     //HANDLE OFFER NFT TRANSFER (ownership change)
@@ -309,6 +320,12 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationEnded, "Ticket registration not ended");
         workflowStatus = WorkflowStatus.DAOTeamSignatureCompleted;
         emit WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationEnded, WorkflowStatus.DAOTeamSignatureCompleted);
+    }
+
+    function running() internal {
+        require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO Team need to sign first in order to generate NFT');
+        workflowStatus = WorkflowStatus.Running;
+        emit WorkflowStatusChanged(WorkflowStatus.DAOTeamSignatureCompleted, WorkflowStatus.Running);
     }
 
     //SWITCH TO RUNNING MODE (need totalThPower and set timeOfLastRewardUpdate)
