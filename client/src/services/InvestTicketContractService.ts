@@ -19,6 +19,11 @@ export class InvestTicketContractService {
     return this.INSTANCE
   }
 
+  public async getOwner(): Promise<any> {
+    const result = await this.contract.getOwner()
+    return result
+  }
+
   public async getTicketsByAddress (address: string): Promise<any> {
     const result = await this.contract.getTicketsByAddress(address)
     return result
