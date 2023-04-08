@@ -37,7 +37,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
 
     struct InvestTicketsStaked {
         Counters.Counter amountOfTicketStaked;
-        mapping(uint => InvestTicket) stakedInvestTickets;
+        mapping(uint => LinkedListInvestTicket) stakedInvestTickets;
     }
 
     struct OfferTicket {
@@ -72,7 +72,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     uint lockTimeLimit;
     LinkedListInvestTicket linkedListHead;
     LinkedListInvestTicket linkedListLast;
-    LinkedListInvestTicket[] stakerList;
+    mapping(uint => LinkedListInvestTicket) stakedList;
     mapping(address => InvestTicketsStaked) investTicketsStaked;
 
 
@@ -134,14 +134,31 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         _;
     }
 
+    function getStakedItem(uint _tokenId) public view returns (LinkedListInvestTicket memory) {
+        return stakedList[_tokenId];
+    }
+
+    function getStakedList() public view returns (InvestTicket[] memory) {
+        InvestTicket[] memory ticketsList = new InvestTicket[](ticketsCounter.current());
+        uint index;
+        if(ticketsCounter.current() == 0){
+            return ticketsList;
+        }
+        LinkedListInvestTicket memory current = linkedListHead;
+        ticketsList[index++] = current.ticket;
+        while(current.nextIndex != 0) {
+            current = stakedList[current.nextIndex];
+            ticketsList[index++] = current.ticket;
+        }
+        return ticketsList;
+    }
+
     //STAKE INVEST TICKET METHOD
     function stakeTicket(uint _tokenId) external {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
-        require(!investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket already staked");
+        require(!investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].ticket.isStaked, "Ticket already staked");
         InvestTicketsContract.stakeTicket(msg.sender, _tokenId);
         InvestTicket memory investTicket = InvestTicket(msg.sender, _tokenId, true);
-        investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId] = investTicket;
-        investTicketsStaked[msg.sender].amountOfTicketStaked.increment();
 
         LinkedListInvestTicket memory item;
         if(!linkedListHead.ticket.isStaked) {
@@ -149,39 +166,47 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
             linkedListHead = item;
         } else {
             item = LinkedListInvestTicket(linkedListLast.ticket.tokenId,investTicket,0);
-            linkedListLast.nextIndex = item.ticket.tokenId;
+            stakedList[linkedListLast.ticket.tokenId].nextIndex = item.ticket.tokenId;
         }
-        stakerList[_tokenId] = item;
+        if(ticketsCounter.current() == 1) {
+            linkedListHead.nextIndex = _tokenId;
+        }
+        stakedList[_tokenId] = item;
         linkedListLast = item;
+
+        investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId] = item;
+        investTicketsStaked[msg.sender].amountOfTicketStaked.increment();
 
         ticketsCounter.increment();
         if(ticketsCounter.current() == maximumTickets){
             mintTicketRegistrationEnded();
         }
+
         emit InvestTicketStaked(item.ticket);
     }
 
     //UNSTAKE INVEST TICKET METHOD
     function unstakeTicket(uint _tokenId) external isInvestTicketStacker {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
-        require(investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket is not staked");
+        require(investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].ticket.isStaked, "Ticket is not staked");
         InvestTicketsContract.unstakeTicket(msg.sender, _tokenId);
 
-        LinkedListInvestTicket memory item = stakerList[_tokenId];
+        LinkedListInvestTicket memory item = stakedList[_tokenId];
         if(linkedListHead.ticket.tokenId == _tokenId) {
-            linkedListHead = stakerList[linkedListHead.nextIndex];
+            linkedListHead = stakedList[linkedListHead.nextIndex];
             linkedListHead.previousIndex = 0;
         }else if(linkedListLast.ticket.tokenId == _tokenId){
-            linkedListLast = stakerList[linkedListLast.previousIndex];
+            linkedListLast = stakedList[linkedListLast.previousIndex];
             linkedListLast.nextIndex = 0;
         }else{
-            stakerList[item.previousIndex].nextIndex = item.nextIndex;
-            stakerList[item.nextIndex].previousIndex = item.previousIndex;
+            stakedList[item.previousIndex].nextIndex = item.nextIndex;
+            stakedList[item.nextIndex].previousIndex = item.previousIndex;
         }
-        delete stakerList[_tokenId];
+        delete stakedList[_tokenId];
 
         investTicketsStaked[msg.sender].amountOfTicketStaked.decrement();
         delete investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId];
+        ticketsCounter.decrement();
 
         emit InvestTicketUnstaked(item.ticket);
     }
