@@ -23,8 +23,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         MintTicketsRegistrationStarted,
         MintTicketsRegistrationEnded,
         DAOTeamSignatureCompleted,
-        RunningNoClaim,
-        RunningWithClaim,
+        Running,
         CanceledMinimumTicketsNotReach,
         Stopped
     }
@@ -37,15 +36,23 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
 
     struct InvestTicketsStaked {
         Counters.Counter amountOfTicketStaked;
-        mapping(uint => InvestTicket) stakedInvestTickets;
+        mapping(uint => LinkedListInvestTicket) stakedInvestTickets;
     }
 
     struct OfferTicket {
         address ticketOwner;
         uint256 power;
+        string tokenUri;
+        uint tokenId;
         Counters.Counter unclaimedMonths;
         uint256 unclaimedValue;
         uint256 timeOfLastRewardUpdate;
+    }
+
+    struct OfferTicketProps {
+        address ticketOwner;
+        uint power;
+        string tokenUri;
     }
 
     struct LinkedListInvestTicket {
@@ -72,7 +79,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     uint lockTimeLimit;
     LinkedListInvestTicket linkedListHead;
     LinkedListInvestTicket linkedListLast;
-    LinkedListInvestTicket[] stakerList;
+    mapping(uint => LinkedListInvestTicket) stakedList;
     mapping(address => InvestTicketsStaked) investTicketsStaked;
 
 
@@ -124,7 +131,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
 
     //MODIFIER CHECK isInvestTicketStaker
     modifier isInvestTicketStacker() {
-        require(investTicketsStaked[msg.sender].amountOfTicketStaked.current() >= 1, "You are not a Ticket Staked");
+        require(investTicketsStaked[msg.sender].amountOfTicketStaked.current() >= 1, "You have 0 Ticket Staked");
         _;
     }
 
@@ -134,14 +141,36 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         _;
     }
 
+    function getStakedTicket(uint _tokenId) public view returns (LinkedListInvestTicket memory) {
+        //return stakedList[_tokenId];
+        return linkedListLast;
+    }
+
+    function getTotalStakedTicket() public view returns (uint) {
+        return ticketsCounter.current();
+    }
+
+    function getStakedList() public view returns (InvestTicket[] memory) {
+        InvestTicket[] memory ticketsList = new InvestTicket[](ticketsCounter.current());
+        uint index;
+        if(ticketsCounter.current() == 0){
+            return ticketsList;
+        }
+        LinkedListInvestTicket memory current = linkedListHead;
+        ticketsList[index++] = current.ticket;
+        while(current.nextIndex != 0) {
+            current = stakedList[current.nextIndex];
+            ticketsList[index++] = current.ticket;
+        }
+        return ticketsList;
+    }
+
     //STAKE INVEST TICKET METHOD
     function stakeTicket(uint _tokenId) external {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
-        require(!investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket already staked");
-        InvestTicketsContract.stakeTicket(_tokenId);
+        require(!investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].ticket.isStaked, "Ticket already staked");
+        InvestTicketsContract.stakeTicket(msg.sender, _tokenId);
         InvestTicket memory investTicket = InvestTicket(msg.sender, _tokenId, true);
-        investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId] = investTicket;
-        investTicketsStaked[msg.sender].amountOfTicketStaked.increment();
 
         LinkedListInvestTicket memory item;
         if(!linkedListHead.ticket.isStaked) {
@@ -149,39 +178,69 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
             linkedListHead = item;
         } else {
             item = LinkedListInvestTicket(linkedListLast.ticket.tokenId,investTicket,0);
-            linkedListLast.nextIndex = item.ticket.tokenId;
+            stakedList[linkedListLast.ticket.tokenId].nextIndex = item.ticket.tokenId;
         }
-        stakerList[_tokenId] = item;
+        if(ticketsCounter.current() == 1) {
+            linkedListHead.nextIndex = _tokenId;
+        }
+        stakedList[_tokenId] = item;
         linkedListLast = item;
+
+        investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId] = item;
+        investTicketsStaked[msg.sender].amountOfTicketStaked.increment();
 
         ticketsCounter.increment();
         if(ticketsCounter.current() == maximumTickets){
             mintTicketRegistrationEnded();
         }
+
         emit InvestTicketStaked(item.ticket);
     }
 
     //UNSTAKE INVEST TICKET METHOD
     function unstakeTicket(uint _tokenId) external isInvestTicketStacker {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
-        require(investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].isStaked, "Ticket is not staked");
-        InvestTicketsContract.unstakeTicket(_tokenId);
+        require(investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].ticket.isStaked, "Ticket is not staked");
+        InvestTicketsContract.unstakeTicket(msg.sender, _tokenId);
 
-        LinkedListInvestTicket memory item = stakerList[_tokenId];
-        if(linkedListHead.ticket.tokenId == _tokenId) {
-            linkedListHead = stakerList[linkedListHead.nextIndex];
-            linkedListHead.previousIndex = 0;
+        LinkedListInvestTicket memory item = stakedList[_tokenId];
+        LinkedListInvestTicket memory _default;
+        if(ticketsCounter.current() == 1) {
+            linkedListHead = _default;
+            linkedListLast = _default;
+        }else if(linkedListHead.ticket.tokenId == _tokenId) {
+            if(linkedListHead.nextIndex == linkedListLast.ticket.tokenId){
+                linkedListHead = LinkedListInvestTicket(0,stakedList[linkedListHead.nextIndex].ticket,0);
+                linkedListLast = _default;
+            } else {
+                linkedListHead = stakedList[linkedListHead.nextIndex];
+                linkedListHead.previousIndex = 0;
+            }
         }else if(linkedListLast.ticket.tokenId == _tokenId){
-            linkedListLast = stakerList[linkedListLast.previousIndex];
-            linkedListLast.nextIndex = 0;
+            if(linkedListHead.nextIndex == linkedListLast.ticket.tokenId){
+                linkedListHead.nextIndex = 0;
+                linkedListLast = _default;
+            } else {
+                linkedListLast = stakedList[linkedListLast.previousIndex];
+                linkedListLast.nextIndex = 0;
+            }
         }else{
-            stakerList[item.previousIndex].nextIndex = item.nextIndex;
-            stakerList[item.nextIndex].previousIndex = item.previousIndex;
+            LinkedListInvestTicket memory previous = stakedList[item.previousIndex];
+            LinkedListInvestTicket memory next = stakedList[item.nextIndex];
+            previous.nextIndex = item.nextIndex;
+            next.previousIndex = item.previousIndex;
+            if(linkedListHead.ticket.tokenId == previous.ticket.tokenId) {
+                linkedListHead = previous;
+            }
+            if(linkedListLast.ticket.tokenId == next.ticket.tokenId) {
+                linkedListLast = previous;
+            }
         }
-        delete stakerList[_tokenId];
+        delete stakedList[_tokenId];
 
         investTicketsStaked[msg.sender].amountOfTicketStaked.decrement();
         delete investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId];
+        ticketsCounter.decrement();
 
         emit InvestTicketUnstaked(item.ticket);
     }
@@ -200,8 +259,34 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     }
 
     //GENERATE OFFER NFT
-    function generateOfferNFT() internal {
-        //BURN TICKET AND GENERATE OFFER
+    function generateOfferNFT(OfferTicketProps[] calldata _offerTicketData, uint256 totalThPower) public onlyOwner {
+        require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO must have signed first');
+        uint tokenId = 1;
+        timeOfLastRewardUpdate = block.timestamp;
+        for(uint i; i < _offerTicketData.length; i++) {
+            Counters.Counter memory counter;
+            OfferTicketProps memory ticketData = _offerTicketData[i];
+            OfferTicket memory ticket = OfferTicket(ticketData.ticketOwner, ticketData.power, ticketData.tokenUri, tokenId, counter, 0, block.timestamp);
+            offerOwnersList.push(ticket);
+            offerTicketOwners[ticketData.ticketOwner] = ticket;
+
+            _mint(ticketData.ticketOwner, tokenId);
+            _setTokenURI(tokenId, ticketData.tokenUri);
+
+            tokenId++;
+        }
+
+        burnAllTickets();
+        running();
+    }
+
+    function burnAllTickets() internal {
+        require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO must have signed first');
+        InvestTicket[] memory investTickets = getStakedList();
+        for(uint i; i < investTickets.length; i++) {
+            InvestTicket memory ticket = investTickets[i];
+            InvestTicketsContract.useTicket(ticket.investTicketOwner, ticket.tokenId);
+        }
     }
 
     //HANDLE OFFER NFT TRANSFER (ownership change)
@@ -235,6 +320,12 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationEnded, "Ticket registration not ended");
         workflowStatus = WorkflowStatus.DAOTeamSignatureCompleted;
         emit WorkflowStatusChanged(WorkflowStatus.MintTicketsRegistrationEnded, WorkflowStatus.DAOTeamSignatureCompleted);
+    }
+
+    function running() internal {
+        require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO Team need to sign first in order to generate NFT');
+        workflowStatus = WorkflowStatus.Running;
+        emit WorkflowStatusChanged(WorkflowStatus.DAOTeamSignatureCompleted, WorkflowStatus.Running);
     }
 
     //SWITCH TO RUNNING MODE (need totalThPower and set timeOfLastRewardUpdate)
