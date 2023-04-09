@@ -28,6 +28,15 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         Stopped
     }
 
+    struct OfferDetail {
+        string offerName;
+        string ref;
+        uint minimumTickets;
+        uint maximumTickets;
+        uint ticketsCounter;
+        uint lockTimeLimit;
+    }
+
     struct InvestTicket {
         address investTicketOwner;
         uint256 tokenId;
@@ -139,6 +148,10 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
     modifier isOfferTicketOwner() {
         require(offerTicketOwners[msg.sender].power >= 1, "You are not an offer ticket owner");
         _;
+    }
+
+    function getOfferDetail() public view returns (OfferDetail memory) {
+        return OfferDetail(offerName, ref, minimumTickets, maximumTickets, ticketsCounter.current(), lockTimeLimit);
     }
 
     function getStakedTicket(uint _tokenId) public view returns (LinkedListInvestTicket memory) {

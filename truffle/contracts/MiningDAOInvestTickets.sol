@@ -37,7 +37,8 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
     mapping (address => Ticket[]) private ticketsByAddress;
     mapping (address => Ticket[]) private usableTicketsByAddress;
     mapping (uint => Ticket) private ticketByTokenId;
-    mapping (address => bool) public whitelistedOfferContract;
+    mapping (address => bool) private whitelistedOfferContract;
+    address[] private whitelistedList;
 
 
 
@@ -46,12 +47,17 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         tokenUri = _tokenURI;
     }
 
+    function getWhitelistedList() public view returns (address[] memory) {
+        return whitelistedList;
+    }
+
     function whitelist(address _contract) public onlyOwner{
         whitelistedOfferContract[_contract] = true;
+        whitelistedList.push(_contract);
     }
 
     function unWhitelist(address _contract) public onlyOwner{
-        whitelistedOfferContract[_contract] = false;
+        removeFromWhitelist(_contract);
     }
 
     function getTicketsByAddress(address _address) public view returns (Ticket[] memory) {
@@ -173,6 +179,18 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         }
         tickets.pop();
         ticketsByAddress[_address] = tickets;
+    }
+
+    function removeFromWhitelist(address _contract) internal {
+        uint extraIndex = 0;
+        for(uint i = 0; i < whitelistedList.length-1; i++){
+            if(whitelistedList[i] == _contract) {
+                extraIndex = 1;
+            }
+            whitelistedList[i] = whitelistedList[i+extraIndex];
+        }
+        whitelistedList.pop();
+        whitelistedOfferContract[_contract] = false;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal virtual override {
