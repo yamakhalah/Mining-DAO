@@ -1,39 +1,33 @@
-# React Truffle Box
+Application permettant de décentraliser le minage en participant collectivement
+à des offres d'achat groupées. 
 
-This box comes with everything you need to start using Truffle to write, compile, test, and deploy smart contracts, and interact with them from a React app.
+Un utilisateur peut acheter un ticket à une valeur unique pour recevoir un NFT correspondant.
+Ce ticket peut être lock sur une offre commerciale afin d'y valider sa participation.
 
-## Installation
+Une fois qu'on a assez de ticket lock sur une offre commerciale, les tickets d'investissements sont burn
+et chaque utilisateur ayant lock au moins un ticket sur cette offre recçois un nouvel NFT correspondant
+à la part qu'il possède de ce parc de minage. Par exemple si il a lock 3 tickets d'investissement
+et que l'offre était limitée à 100 tickets il possède un NFT correspondant à 3% du parc de minage de cette offre.
 
-First ensure you are in an empty directory.
+Afin de maintenir le floor price et rassurer les utilisateurs tout ticket d'investissement n'étant pas lock
+et n'ayant jamais été utilisé (donc burn) peut être remboursé pour 95% de sa valeur initiale.
 
-Run the `unbox` command using 1 of 2 ways.
 
-```sh
-# Install Truffle globally and run `truffle unbox`
-$ npm install -g truffle
-$ truffle unbox react
-```
+L'application se décompose en deux smart contract distinct:
 
-```sh
-# Alternatively, run `truffle unbox` via npx
-$ npx truffle unbox react
-```
+MiningDAOInvestTickets.sol 
 
-Start the react dev server.
+Permet de minter et d'utiliser les tickets d'investissements qui seront lock sur les offres commerciales
 
-```sh
-$ cd client
-$ npm start
-```
 
-From there, follow the instructions on the hosted React app. It will walk you through using Truffle and Ganache to deploy the `SimpleStorage` contract, making calls to it, and sending transactions to change the contract's state.
+MiningDAOCommercialOffer.sol 
 
-## FAQ
+Un contrat par offre commerciale qui permet de lock les tickets d'investissements dessus. Il y a un nombre de ticket minimum 
+à atteindre mais également un nombre maximum au dela duquel l'offre sera automatiquement validée et la possibilitée
+de lock de nouveaux tickets dessus sera impossible.
 
-- __How do I use this with Ganache (or any other network)?__
+Il y a bien sûr un délais maximum au dela duquel si le nombre minimum de ticket n'a pas été lock tous les utilisateurs verront
+leur ticket d'instissement libéré et l'offre sera annulée.
 
-  The Truffle project is set to deploy to Ganache by default. If you'd like to change this, it's as easy as modifying the Truffle config file! Check out [our documentation on adding network configurations](https://trufflesuite.com/docs/truffle/reference/configuration/#networks). From there, you can run `truffle migrate` pointed to another network, restart the React dev server, and see the change take place.
 
-- __Where can I find more resources?__
-
-  This Box is a sweet combo of [Truffle](https://trufflesuite.com) and [Webpack](https://webpack.js.org). Either one would be a great place to start!
+Présentation: https://www.dropbox.com/t/QgyE0xQ8LzTrvmMl
