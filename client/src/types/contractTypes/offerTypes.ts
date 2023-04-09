@@ -1,5 +1,14 @@
 import { BigNumber } from 'ethers'
 
+enum WorkflowStatus {
+  Initialized,
+  MintTicketsRegistrationStarted,
+  MintTicketsRegistrationEnded,
+  Running,
+  CanceledMinimumTicketsNotReach,
+  Stopped
+}
+
 interface OfferDetail {
   address: string
   offerName: string
@@ -8,6 +17,7 @@ interface OfferDetail {
   maximumTickets: number
   ticketsCounter: number
   lockTimeLimit: Date
+  workflowStatus: WorkflowStatus
 }
 
 interface OfferDetailReturn {
@@ -17,6 +27,7 @@ interface OfferDetailReturn {
   maximumTickets: BigNumber
   ticketsCounter: BigNumber
   lockTimeLimit: BigNumber
+  status: number
 }
 
 function unboxOfferDetail (address: string, offerDetailReturn: OfferDetailReturn): OfferDetail {
@@ -28,7 +39,8 @@ function unboxOfferDetail (address: string, offerDetailReturn: OfferDetailReturn
     minimumTickets: offerDetailReturn.minimumTickets.toNumber(),
     maximumTickets: offerDetailReturn.maximumTickets.toNumber(),
     ticketsCounter: offerDetailReturn.ticketsCounter.toNumber(),
-    lockTimeLimit: new Date(offerDetailReturn.lockTimeLimit.toNumber() * 1000)
+    lockTimeLimit: new Date(offerDetailReturn.lockTimeLimit.toNumber() * 1000),
+    workflowStatus: offerDetailReturn.status
   }
 }
 

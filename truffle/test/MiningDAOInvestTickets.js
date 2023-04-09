@@ -5,6 +5,7 @@ const Web3 = require('web3')
 
 contract("MiningDAOInvestTickets", accounts => {
   let investTicketsInstance;
+  let whitelistedContract = accounts[5]
 
   const tokenUri = "https://gateway.pinata.cloud/ipfs/QmavcjZXHmzx9guhBaqwCFVy5BwcxRkEK3aDBEjr9PHriy"
   const DAOAdress = accounts[0]
@@ -29,7 +30,7 @@ contract("MiningDAOInvestTickets", accounts => {
       expect(mintPriceETH).to.be.bignumber.equal(BN(2000000000000000))
     })
   })
-/*
+
   describe("Mint Ticket Test and associated getter", () => {
     beforeEach(async function() {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress,tokenUri, { from: accounts[0]})
@@ -73,25 +74,26 @@ contract("MiningDAOInvestTickets", accounts => {
   describe("Stake ticket test", () => {
     beforeEach(async function() {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress,tokenUri, { from: accounts[0]})
+      await investTicketsInstance.whitelist(whitelistedContract, { from: accounts[0]})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
     })
 
     it("Should not let me stake - Not a minter", async() => {
-      await expectRevert(investTicketsInstance.stakeTicket(BN(5), { from: accounts[1] }), 'Not a minter')
+      await expectRevert(investTicketsInstance.stakeTicket(accounts[1], BN(5), { from: whitelistedContract }), 'Not a minter')
     })
 
     it("Should not let me stake - Caller not the owner", async() => {
-      await expectRevert(investTicketsInstance.stakeTicket(BN(1), { from: accounts[2] }), 'Caller is not owner')
+      await expectRevert(investTicketsInstance.stakeTicket(accounts[2], BN(1), { from: whitelistedContract }), 'Caller is not a minter')
     })
 
     it("Should not let me stake - Ticket already staked", async() => {
-      await investTicketsInstance.stakeTicket(BN(1), { from: accounts[1]})
-      await expectRevert(investTicketsInstance.stakeTicket(BN(1), { from: accounts[1] }), 'Token already staked')
+      await investTicketsInstance.stakeTicket(accounts[1], BN(1), { from: whitelistedContract})
+      await expectRevert(investTicketsInstance.stakeTicket(accounts[1], BN(1), { from: whitelistedContract }), 'Token already staked')
     })
 
     it("Should let me stake ticket and change isStaked and launch event", async() => {
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
-      const result = await investTicketsInstance.stakeTicket(BN(2), { from: accounts[1]})
+      const result = await investTicketsInstance.stakeTicket(accounts[1], BN(2), { from: whitelistedContract})
       const ticket = await investTicketsInstance.getTicketByTokenId(BN(2), {from: accounts[1]})
       expect(ticket.tokenId).to.be.bignumber.equal(BN(2))
       expect(ticket.ticketOwner).to.be.equal(accounts[1])
@@ -107,35 +109,36 @@ contract("MiningDAOInvestTickets", accounts => {
     })
 
     it("Should not let me stake - Ticket used", async() => {
-      await investTicketsInstance.stakeTicket(BN(1), { from: accounts[1] })
-      await investTicketsInstance.useTicket(BN(1), { from: accounts[1]})
-      await expectRevert(investTicketsInstance.stakeTicket(BN(1), { from: accounts[1] }), 'This ticket has already been used')
+      await investTicketsInstance.stakeTicket(accounts[1], BN(1), { from: whitelistedContract })
+      await investTicketsInstance.useTicket(accounts[1], BN(1), { from: whitelistedContract})
+      await expectRevert(investTicketsInstance.stakeTicket(accounts[1], BN(1), { from: whitelistedContract }), 'This ticket has already been used')
     })
   })
 
   describe("Unstake ticket test", () => {
     beforeEach(async function() {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress,tokenUri, { from: accounts[0]})
+      await investTicketsInstance.whitelist(whitelistedContract, { from: accounts[0]})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
-      await investTicketsInstance.stakeTicket(BN(1), { from: accounts[1] })
+      await investTicketsInstance.stakeTicket(accounts[1], BN(1), { from: whitelistedContract })
     })
 
     it("Should not let me unstake - Not a minter", async() => {
-      await expectRevert(investTicketsInstance.unstakeTicket(BN(5), { from: accounts[1] }), 'Not a minter')
+      await expectRevert(investTicketsInstance.unstakeTicket(accounts[1], BN(5), { from: whitelistedContract }), 'Not a minter')
     })
 
     it("Should not let me unstake - Caller not the owner", async() => {
       const ticket = await investTicketsInstance.getTicketByTokenId(BN(1))
-      await expectRevert(investTicketsInstance.unstakeTicket(BN(1), { from: accounts[2] }), 'Caller is not owner')
+      await expectRevert(investTicketsInstance.unstakeTicket(accounts[2], BN(1), { from: whitelistedContract }), 'Caller is not a minter')
     })
 
     it("Should not let me unstake - Ticket not staked", async() => {
-      await expectRevert(investTicketsInstance.unstakeTicket(BN(2), { from: accounts[1] }), 'Token is not staked')
+      await expectRevert(investTicketsInstance.unstakeTicket(accounts[1], BN(2), { from: whitelistedContract }), 'Token is not staked')
     })
 
     it("Should let me unstake ticket and change isStaked and launch event", async() => {
-      const result = await investTicketsInstance.unstakeTicket(BN(1), { from: accounts[1]})
+      const result = await investTicketsInstance.unstakeTicket(accounts[1], BN(1), { from: whitelistedContract})
       const ticket = await investTicketsInstance.getTicketByTokenId(BN(1), {from: accounts[1]})
       expect(ticket.tokenId).to.be.bignumber.equal(BN(1))
       expect(ticket.ticketOwner).to.be.equal(accounts[1])
@@ -151,36 +154,37 @@ contract("MiningDAOInvestTickets", accounts => {
     })
 
     it("Should not let me unstake - Ticket used", async() => {
-      await investTicketsInstance.useTicket(BN(1), { from: accounts[1] })
-      await expectRevert(investTicketsInstance.unstakeTicket(BN(1), { from: accounts[1] }), 'This ticket has already been used')
+      await investTicketsInstance.useTicket(accounts[1], BN(1), { from: whitelistedContract })
+      await expectRevert(investTicketsInstance.unstakeTicket(accounts[1], BN(1), { from: whitelistedContract }), 'This ticket has already been used')
     })
   })
 
   describe("Use and refund ticket", () => {
     beforeEach(async function () {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress, tokenUri, {from: accounts[0]})
+      await investTicketsInstance.whitelist(whitelistedContract, { from: accounts[0]})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
-      await investTicketsInstance.stakeTicket(BN(1), {from: accounts[1]})
+      await investTicketsInstance.stakeTicket(accounts[1], BN(1), {from: whitelistedContract})
     })
 
     it("Should not let me useTicket or refundTicket - Not a minter", async() => {
-      await expectRevert(investTicketsInstance.useTicket(BN(5), { from: accounts[1] }), 'Not a minter')
+      await expectRevert(investTicketsInstance.useTicket(accounts[1], BN(5), { from: whitelistedContract }), 'Not a minter')
       await expectRevert(investTicketsInstance.refundTicket(accounts[1], BN(5), { from: accounts[1] }), 'Not a minter')
     })
 
     it("Should not let me useTicket or refundTicket - Caller not the owner", async() => {
       const ticket = await investTicketsInstance.getTicketByTokenId(BN(1))
-      await expectRevert(investTicketsInstance.useTicket(BN(1), { from: accounts[2] }), 'Caller is not owner')
-      await expectRevert(investTicketsInstance.refundTicket(accounts[1], BN(1), { from: accounts[2] }), 'Caller is not owner')
+      await expectRevert(investTicketsInstance.useTicket(accounts[2], BN(1), { from: whitelistedContract }), 'Caller is not a minter')
+      await expectRevert(investTicketsInstance.refundTicket(accounts[2], BN(1), { from: accounts[2] }), 'Caller is not owner')
     })
 
     it("Should not let me useTicket - Ticket not staked", async() => {
-      await expectRevert(investTicketsInstance.useTicket(BN(2), { from: accounts[1] }), 'Token is not staked')
+      await expectRevert(investTicketsInstance.useTicket(accounts[1], BN(2), { from: whitelistedContract }), 'Token is not staked')
     })
 
     it("Should let me use ticket, launch event and burn ticket", async() => {
-      const result = await investTicketsInstance.useTicket(BN(1), { from: accounts[1]})
+      const result = await investTicketsInstance.useTicket(accounts[1], BN(1), { from: whitelistedContract})
       const ticket = await investTicketsInstance.getTicketByTokenId(BN(1), {from: accounts[1]})
       const tickets = await investTicketsInstance.getTicketsByAddress(accounts[1])
 
@@ -205,19 +209,20 @@ contract("MiningDAOInvestTickets", accounts => {
   describe("transfer", () => {
     beforeEach(async function () {
       investTicketsInstance = await MiningDAOInvestTickets.new(DAOAdress, tokenUri, {from: accounts[0]})
+      await investTicketsInstance.whitelist(whitelistedContract, { from: accounts[0]})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
       await investTicketsInstance.mintTicketETH(accounts[1], {from: accounts[1], value: BN(Web3.utils.toWei('0.001'))})
     })
 
     it("Should not let transfer an used token", async() => {
-      await investTicketsInstance.stakeTicket(BN(1), {from: accounts[1]})
-      await investTicketsInstance.useTicket(BN(1), {from: accounts[1]})
+      await investTicketsInstance.stakeTicket(accounts[1], BN(1), {from: whitelistedContract})
+      await investTicketsInstance.useTicket(accounts[1], BN(1), {from: whitelistedContract})
       await expectRevert(investTicketsInstance.safeTransferFrom(accounts[1], accounts[2], BN(1), { from: accounts[1] }), 'You cannot transfer a used token');
     })
 
     it("Should not let transfer an staked token", async() => {
-      await investTicketsInstance.stakeTicket(BN(2), {from: accounts[1]})
+      await investTicketsInstance.stakeTicket(accounts[1], BN(2), {from: whitelistedContract})
       await expectRevert(investTicketsInstance.safeTransferFrom(accounts[1], accounts[2], BN(2), { from: accounts[1] }), 'You cannot transfer a staked token');
     })
 
@@ -228,5 +233,4 @@ contract("MiningDAOInvestTickets", accounts => {
     })
   })
 
- */
 })

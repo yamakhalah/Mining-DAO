@@ -18,6 +18,10 @@ export default makeStyles()((theme) => {
       alignItems: 'center'
     },
 
+    containerPadding: {
+      padding: '3rem 0rem 3rem 0rem'
+    },
+
     lightBackground: {
       backgroundColor: '#42475F !important',
       borderRadius: '20px',
@@ -32,7 +36,7 @@ export default makeStyles()((theme) => {
     },
 
     button: {
-      width: '40%',
+      width: '70%',
       height: '5rem',
       fontSize: '15px',
       color: 'white',
@@ -44,7 +48,7 @@ export default makeStyles()((theme) => {
     },
 
     paddingRight: {
-      paddingRight: '5rem'
+      paddingRight: '3rem'
     },
 
     link: {

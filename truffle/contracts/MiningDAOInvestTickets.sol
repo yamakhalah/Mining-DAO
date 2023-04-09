@@ -6,18 +6,14 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
-// ADD 5% Royalty
-// ADD STATIC Variable method
-// Attention royalty check par rapport à blur.
-
-
-
 contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
     struct Ticket {
         uint tokenId;
+        uint index;
         address ticketOwner;
+        address escrowContract;
         uint gweiValue;
         bool isUsed;
         bool isMinted;
@@ -93,7 +89,9 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
 
         _tokenIds.increment();
         uint newTokenId = _tokenIds.current();
-        Ticket memory ticket = Ticket(newTokenId, _customer, mintPriceETH, false, true, false);
+        address _default;
+        uint length = ticketsByAddress[_customer].length;
+        Ticket memory ticket = Ticket(newTokenId, length, msg.sender, _default, mintPriceETH, false, true, false);
         ticketsByAddress[_customer].push(ticket);
         ticketByTokenId[newTokenId] = ticket;
 
@@ -113,7 +111,9 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         require(!ticket.isStaked, "Token already staked");
 
         ticket.isStaked = true;
+        ticket.escrowContract = msg.sender;
         ticketByTokenId[_tokenId] = ticket;
+        ticketsByAddress[_origin][ticket.index] = ticket;
 
         emit TicketStaked(ticket);
     }
@@ -127,7 +127,9 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         require(ticket.isStaked, "Token is not staked");
 
         ticket.isStaked = false;
+        ticket.escrowContract = address(0);
         ticketByTokenId[_tokenId] = ticket;
+        ticketsByAddress[_origin][ticket.index] = ticket;
 
         emit TicketUnstaked(ticket);
     }
@@ -143,7 +145,7 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         _burn(_tokenId);
         ticket.isUsed = true;
         ticketByTokenId[_tokenId] = ticket;
-        removeFromList(msg.sender, _tokenId);
+        removeFromList(_origin, _tokenId);
 
         emit TicketBurned(ticket);
     }
@@ -193,13 +195,13 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
         whitelistedOfferContract[_contract] = false;
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal virtual override {
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal override {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
-        require(!ticketByTokenId[tokenId].isUsed, "You cannot transfer a used token");
-        require(!ticketByTokenId[tokenId].isStaked, "You cannot transfer a staked token");
+        require(!ticketByTokenId[tokenId].isUsed || to == address(0), "You cannot transfer a used token");
+        require(!ticketByTokenId[tokenId].isStaked || to == address(0), "You cannot transfer a staked token");
     }
 
-    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override {
+    function safeTransferFrom(address from, address to, uint256 tokenId) public override {
         super.safeTransferFrom(from, to, tokenId);
         ticketByTokenId[tokenId].ticketOwner = to;
     }

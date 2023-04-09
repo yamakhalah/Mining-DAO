@@ -29,7 +29,11 @@ export class CommercialOfferContractService {
 
   public async getOfferDetail (): Promise<OfferDetail> {
     const result = await this.contract.getOfferDetail()
-    console.log('OFFER DETAIL RESULT', result)
+    console.log('RESULT', result)
     return unboxOfferDetail(this.address, result)
+  }
+
+  public async stakeTicket (tokenId: number): Promise<void> {
+    await this.contract.stakeTicket(tokenId)
   }
 }

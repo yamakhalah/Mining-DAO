@@ -1,6 +1,6 @@
 import contract from '../MiningDAOInvestTickets.json'
 
-const investTicketContractAddress = '0x3cEbb7E218E7c0b98394e010023AC73A939C7C4E'
+const investTicketContractAddress = '0x11eE5Fa8c34225b7538E8B8C92E780c0870aAdC2'
 const investTicketContractABI = contract.abi
 
 export { investTicketContractAddress, investTicketContractABI }
