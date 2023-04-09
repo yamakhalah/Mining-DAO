@@ -37,7 +37,7 @@ contract MiningDAOInvestTickets is ERC721URIStorage, Ownable {
     mapping (address => Ticket[]) private ticketsByAddress;
     mapping (address => Ticket[]) private usableTicketsByAddress;
     mapping (uint => Ticket) private ticketByTokenId;
-    mapping (address => bool) private whitelistedOfferContract;
+    mapping (address => bool) public whitelistedOfferContract;
 
 
 
