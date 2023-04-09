@@ -3,7 +3,6 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
-import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import './MiningDAOInvestTickets.sol';
 
 // ADD 5% Royalty
@@ -12,7 +11,7 @@ import './MiningDAOInvestTickets.sol';
 
 
 
-contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
+contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
 
@@ -26,6 +25,16 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         Running,
         CanceledMinimumTicketsNotReach,
         Stopped
+    }
+
+    struct OfferDetail {
+        string offerName;
+        string ref;
+        uint minimumTickets;
+        uint maximumTickets;
+        uint ticketsCounter;
+        uint lockTimeLimit;
+        WorkflowStatus status;
     }
 
     struct InvestTicket {
@@ -116,6 +125,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         minimumTickets = _minimumTickets;
         maximumTickets = _maximumTickets;
         lockTimeLimit = _lockTimeLimit;
+        workflowStatus = WorkflowStatus.Initialized;
 
         whitelisted[_DAOWallet] = true;
         for(uint i = 0; i < _DAOTeamWallets.length; i++){
@@ -140,6 +150,11 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable, ReentrancyGuard{
         require(offerTicketOwners[msg.sender].power >= 1, "You are not an offer ticket owner");
         _;
     }
+
+    function getOfferDetail() public view returns (OfferDetail memory) {
+        return OfferDetail(offerName, ref, minimumTickets, maximumTickets, ticketsCounter.current(), lockTimeLimit, workflowStatus);
+    }
+
 
     function getStakedTicket(uint _tokenId) public view returns (LinkedListInvestTicket memory) {
         //return stakedList[_tokenId];

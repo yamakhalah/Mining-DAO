@@ -18,7 +18,6 @@ function InvestTicket (): JSX.Element {
   useEffect(() => {
     async function getTickets (): Promise<void> {
       let data: Ticket[] = await InvestTicketContractService.getInstance(address as string, provider).getTicketsByAddress(address as string)
-      console.log(data)
       data = data.filter(t => !t.isStaked && !t.isUsed)
       setTickets(data)
     }

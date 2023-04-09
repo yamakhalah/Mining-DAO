@@ -25,7 +25,7 @@ export class InvestTicketContractService {
   }
 
   public async getWhitelistedOfferContract (): Promise<any> {
-    const result = await this.contract.whitelistedOfferContract()
+    const result = await this.contract.getWhitelistedList()
     return result
   }
 

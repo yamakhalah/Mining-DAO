@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { Home, AppHome, InvestTicket, Admin } from 'pages/index'
+import { Home, AppHome, InvestTicket, Admin, Offer } from 'pages/index'
 import { MainNavigation, AppNavigation } from 'components/'
 import { useAccount, useProvider } from 'wagmi'
 import { InvestTicketContractService } from 'services/InvestTicketContractService'
@@ -49,6 +49,7 @@ function AppRouter (): JSX.Element {
     <Routes>
       <Route path='/' element={<AppHome />} />
       <Route path='/invest-ticket' element={<InvestTicket />} />
+      <Route path='/offers' element={<Offer />} />
       <Route path='/admin' element={(
         <PrivateWrapper>
           <Admin />
