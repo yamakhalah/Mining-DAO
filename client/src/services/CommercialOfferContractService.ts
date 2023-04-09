@@ -34,6 +34,6 @@ export class CommercialOfferContractService {
   }
 
   public async stakeTicket (tokenId: number): Promise<void> {
-    await this.contract.stakeTicket(tokenId)
+    await this.contract.stakeTicket(tokenId, { gasLimit: 5000000 })
   }
 }
