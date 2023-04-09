@@ -19,6 +19,16 @@ export class InvestTicketContractService {
     return this.INSTANCE
   }
 
+  public async getOwner (): Promise<any> {
+    const result = await this.contract.owner()
+    return result
+  }
+
+  public async getWhitelistedOfferContract (): Promise<any> {
+    const result = await this.contract.whitelistedOfferContract()
+    return result
+  }
+
   public async getTicketsByAddress (address: string): Promise<any> {
     const result = await this.contract.getTicketsByAddress(address)
     return result
@@ -61,7 +71,6 @@ export class InvestTicketContractService {
   }
 
   public async refundTicket (address: string, tokenId: number): Promise<any> {
-    console.log('TOKEN ID', tokenId)
     const transaction = await this.contract.refundTicket(address, tokenId, { gasLimit: 5000000 })
     const result = await transaction.wait()
     return result
