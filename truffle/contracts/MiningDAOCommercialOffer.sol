@@ -5,18 +5,17 @@ import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 import './MiningDAOInvestTickets.sol';
 
-// ADD 5% Royalty
-// ADD STATIC Variable method
-// Attention royalty check par rapport à blur.
-
-
-
+/// @title ERC721 Contract for offer contract management
+/// @author Dylan Di Vito
+/// @notice Serves as offer contract management and NFT collection
+/// @dev Inherit the openzepellin ERC721 implementation
 contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
-
+    /// @dev InvestTicket contract in order to stake/unstake/use them through commercial offer
     MiningDAOInvestTickets private InvestTicketsContract;
 
+    /// @dev Status of the smartcontract in order to handle control
     enum WorkflowStatus {
         Initialized,
         MintTicketsRegistrationStarted,
@@ -27,6 +26,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         Stopped
     }
 
+    /// @dev All details of contract objet. Used as return object for Dapp
     struct OfferDetail {
         string offerName;
         string ref;
@@ -36,18 +36,20 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         uint lockTimeLimit;
         WorkflowStatus status;
     }
-
+    /// @dev Invest ticket staked on commercial offer
     struct InvestTicket {
         address investTicketOwner;
         uint256 tokenId;
         bool isStaked;
     }
 
+    /// @dev Map and counter of  tickets staked by one user
     struct InvestTicketsStaked {
         Counters.Counter amountOfTicketStaked;
         mapping(uint => LinkedListInvestTicket) stakedInvestTickets;
     }
 
+    /// @dev OfferTicket object represent one NFT minted by users when offer is closed to staking and burn all ticket in order to generate NFT
     struct OfferTicket {
         address ticketOwner;
         uint256 power;
@@ -58,12 +60,14 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         uint256 timeOfLastRewardUpdate;
     }
 
+    /// @dev OfferTicket reduced object used to return data to frontend
     struct OfferTicketProps {
         address ticketOwner;
         uint power;
         string tokenUri;
     }
 
+    /// @dev Structure of a linkedlist object used to keep next and previous index
     struct LinkedListInvestTicket {
         uint previousIndex;
         InvestTicket ticket;
@@ -71,31 +75,48 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
     }
 
     // GLOBAL
-
+    /// @dev Address of the DAO contract
     address DAOWallet;
+    /// @dev Address of all DAO team waller
     address[] DAOTeamWallets;
+    /// @dev Address of the treasury
     address treasuryWallet;
+    /// @dev Name of the offer
     string offerName;
+    /// @dev Reference of the offer
     string ref;
+    /// @dev Whitelisted wallet
     mapping(address => bool) whitelisted;
-
+    /// @dev Status of contract
     WorkflowStatus public workflowStatus;
 
     // PHASE 1
+    /// @dev Number of minimum ticket staked required
     uint minimumTickets;
+    /// @dev Number of maximum ticket staked allowed
     uint maximumTickets;
+    /// @dev Number of tickets actually staked
     Counters.Counter ticketsCounter;
+    /// @dev Maximum Datetime after what staking is not allowed anymore
     uint lockTimeLimit;
+    /// @dev Head of the linked list. used to start iteration
     LinkedListInvestTicket linkedListHead;
+    /// @dev Tail of linked list
     LinkedListInvestTicket linkedListLast;
+    /// @dev Ticket by tokenId
     mapping(uint => LinkedListInvestTicket) stakedList;
+    /// @dev All tickets by user address
     mapping(address => InvestTicketsStaked) investTicketsStaked;
 
 
     // PHASE 2
+    /// @dev last time DAO rewarded the contract
     uint256 timeOfLastRewardUpdate;
+    /// @dev Total power of mining
     uint256 totalTHPower;
+    /// @dev List of ticket NFT owner
     OfferTicket[] offerOwnersList;
+    /// @dev Offer ticket map by user address
     mapping(address => OfferTicket) public offerTicketOwners;
 
     event InvestTicketStaked(InvestTicket ticket);
@@ -103,7 +124,8 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
     event RewardClaimed(OfferTicket ticket);
     event WorkflowStatusChanged(WorkflowStatus previous, WorkflowStatus current);
 
-    //CONSTRUCTOR
+
+    /// @dev Constructor need to init all global parameters
     constructor(
         address _InvestTicketsContractAddress,
         string memory _offerName,
@@ -133,38 +155,41 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         }
     }
 
-    //MODIFIER CHECK whitelistedOwner
+    /// @dev MODIFIER CHECK whitelistedOwner
     modifier isWhitelisted() {
         require(whitelisted[msg.sender] == true, "You are not whitelisted");
         _;
     }
 
-    //MODIFIER CHECK isInvestTicketStaker
+    /// @dev MODIFIER CHECK isInvestTicketStaker
     modifier isInvestTicketStacker() {
         require(investTicketsStaked[msg.sender].amountOfTicketStaked.current() >= 1, "You have 0 Ticket Staked");
         _;
     }
 
-    //MOFICIER CHECK isOfferTicketOwner
+    /// @dev MODIFIER CHECK isOfferTicketOwner
     modifier isOfferTicketOwner() {
         require(offerTicketOwners[msg.sender].power >= 1, "You are not an offer ticket owner");
         _;
     }
 
+    /// @dev Get detail of Offer for frontend. Encapslate info in OfferDetail struct
     function getOfferDetail() public view returns (OfferDetail memory) {
         return OfferDetail(offerName, ref, minimumTickets, maximumTickets, ticketsCounter.current(), lockTimeLimit, workflowStatus);
     }
 
-
+    /// @dev get Staked ticket by token id
     function getStakedTicket(uint _tokenId) public view returns (LinkedListInvestTicket memory) {
         //return stakedList[_tokenId];
         return linkedListLast;
     }
 
+    /// @dev get total number of staked ticket
     function getTotalStakedTicket() public view returns (uint) {
         return ticketsCounter.current();
     }
 
+    /// @dev get list of staked ticket by iterate through linked list
     function getStakedList() public view returns (InvestTicket[] memory) {
         InvestTicket[] memory ticketsList = new InvestTicket[](ticketsCounter.current());
         uint index;
@@ -180,7 +205,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         return ticketsList;
     }
 
-    //STAKE INVEST TICKET METHOD
+    /// @dev Stake ticket on offer and interact with InvestTicket contract
     function stakeTicket(uint _tokenId) external {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
         require(!investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].ticket.isStaked, "Ticket already staked");
@@ -212,7 +237,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         emit InvestTicketStaked(item.ticket);
     }
 
-    //UNSTAKE INVEST TICKET METHOD
+    /// @dev Unstake ticket on offer and interact with InvestTicket contract
     function unstakeTicket(uint _tokenId) external isInvestTicketStacker {
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationStarted, "Staking is not authorized anymore");
         require(investTicketsStaked[msg.sender].stakedInvestTickets[_tokenId].ticket.isStaked, "Ticket is not staked");
@@ -260,20 +285,21 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         emit InvestTicketUnstaked(item.ticket);
     }
 
+    /// @dev Unstake all ticket from contract. Used after they got burned in order to generate commercial offer NFT
     function unstakeAllTickets() internal {
         //Unstake all Tickets
     }
 
 
 
-    //DAOSIGNATURE REQUEST
+    /// @dev DAO Signature before burn all investTickets and generate offer NFT
     function DAOTeamSignatureRequest() external {
         require(msg.sender == DAOWallet, "You are not the DAO !");
         require(workflowStatus == WorkflowStatus.MintTicketsRegistrationEnded);
         DAOTeamSignatureCompleted();
     }
 
-    //GENERATE OFFER NFT
+    /// @dev Will generate one NFT for each user based on number of ticket staked by each.
     function generateOfferNFT(OfferTicketProps[] calldata _offerTicketData, uint256 totalThPower) public onlyOwner {
         require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO must have signed first');
         uint tokenId = 1;
@@ -295,6 +321,7 @@ contract MiningDAOCommercialOffer is ERC721URIStorage, Ownable {
         running();
     }
 
+    /// @dev Burn all InvestTickets staked
     function burnAllTickets() internal {
         require(workflowStatus == WorkflowStatus.DAOTeamSignatureCompleted, 'DAO must have signed first');
         InvestTicket[] memory investTickets = getStakedList();
